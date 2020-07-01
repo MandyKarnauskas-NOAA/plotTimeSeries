@@ -25,27 +25,22 @@ plotIndicatorTimeSeries(
 }
 \arguments{
 \item{filename}{file in standardized indicator reporting csv format.
-Column 1 is time values, columns 2+ are indicator data
-Row 1 is indicator name (main title of plot)
-Row 2 is units (y-axis label)
-Row 3 is spatial extent or other specifying information
-Time can be in yearly or monthly time step
-- If annual time series, years must be in YYYY format (e.g., 2011)
-- Monthly time series can be in any combination of text abbreviation
-and year formats (e.g, Jan1986, Jan-86, 1986jan)
-Note: must exclude days! (e.g, 1-Dec will be read as December 2001)}
+\strong{Column 1} is time values, \strong{columns 2} and on are indicator data.
+\strong{Row 1} must be indicator name (main title of plot).
+\strong{Row 2} must be units (y-axis label).
+\strong{Row 3} is optional information for sublabel (when multiple panels are used).
+Time can be in year (with century), or monthly time step in a variety of formats (e.g, Jan1986, Jan-86, 1986jan)}
 
-\item{coltoplot}{column number of indicator file to plot (only col 2 is default)}
+\item{coltoplot}{column numbers of indicator file to plot (defaults to only column 2)}
 
 \item{plotrownum}{number of rows of plots in multi-panel plot}
 
 \item{plotcolnum}{number of columns of plots in multi-panel plot
-plotrownum and plotcolnum must be used if length(coltoplot) > 1
-specify layout (e.g., 4 panels could be plotrownum = 2, plotcolnum = 2}
+plotrownum and plotcolnum must be used if length(coltoplot) > 1 to specify layout (e.g., 4 panels could be plotrownum = 2, plotcolnum = 2)}
 
-\item{sublabel}{whether extent description should appear within main label}
+\item{sublabel}{whether optional descriptive information should appear within main label}
 
-\item{sameYscale}{for multi-panel plots, if y-axis scale should be the same}
+\item{sameYscale}{set to TRUE for multi-panel plots if consistent y-axis scale is desired.}
 
 \item{yposadj}{manual adjustment of position of y-axis label}
 
@@ -58,18 +53,17 @@ defaults to points, with lines for consecutive years only
 for points only use type = "ptsOnly"
 for all lines use type="allLines"}
 
-\item{trendAnalysis}{whether to highlight trend in mean and SD over last 5 years
-default is T unless fewer than 5 years of data}
+\item{trendAnalysis}{if TRUE, highlight trend in mean and SD over last 5 years; defaults to TRUE unless fewer than 5 years of data}
 
-\item{propNAallow}{proportion NAs allowed in trend analysis (defaults to 0.4)}
+\item{propNAallow}{if proportion of missing values in last 5 years exceeds this value, overrides trendAnalysis=T and will not plot trend (defaults to 0.4)         -}
 
-\item{redgreen}{whether or not to include red/green on plot (default is true)}
+\item{redgreen}{set to FALSE to remove red/green shading of anomalies from plot}
 
-\item{anom}{calculate and plot monthly anomalies
-for monthly anomalies: anom = "mon"
-for standardized monthly anomalies: anom ="stmon"
-@param outname specify alternate output filename (default is same as input)
-@param outtype format for output (defaults to png, pdf also possible)}
+\item{anom}{calculate and plot monthly anomalies; for monthly anomalies use anom = "mon", for standardized monthly anomalies use anom ="stmon"}
+
+\item{outname}{specify alternate output filename if input name is not desired}
+
+\item{outtype}{format for output ("png", "pdf")}
 }
 \description{
 This function is for standardized plotitng of indicator time series for Ecosystem Status Reports.

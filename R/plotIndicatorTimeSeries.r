@@ -7,23 +7,18 @@
 #'   Highlights last 5 years of data and shows pattern in mean and trend
 #'
 #' @param filename file in standardized indicator reporting csv format.
-#'   Column 1 is time values, columns 2+ are indicator data
-#'   Row 1 is indicator name (main title of plot)
-#'   Row 2 is units (y-axis label)
-#'   Row 3 is spatial extent or other specifying information
-#'   Time can be in yearly or monthly time step
-#'      - If annual time series, years must be in YYYY format (e.g., 2011)
-#'      - Monthly time series can be in any combination of text abbreviation
-#'         and year formats (e.g, Jan1986, Jan-86, 1986jan)
-#'         Note: must exclude days! (e.g, 1-Dec will be read as December 2001)
+#'   **Column 1** is time values, **columns 2** and on are indicator data.
+#'   **Row 1** must be indicator name (main title of plot).
+#'   **Row 2** must be units (y-axis label).
+#'   **Row 3** is optional information for sublabel (when multiple panels are used).
+#'   Time can be in year (with century), or monthly time step in a variety of formats (e.g, Jan1986, Jan-86, 1986jan)
 #'
-#' @param coltoplot column number of indicator file to plot (only col 2 is default)
+#' @param coltoplot column numbers of indicator file to plot (defaults to only column 2)
 #' @param plotrownum number of rows of plots in multi-panel plot
 #' @param plotcolnum number of columns of plots in multi-panel plot
-#'        plotrownum and plotcolnum must be used if length(coltoplot) > 1
-#'        specify layout (e.g., 4 panels could be plotrownum = 2, plotcolnum = 2
-#' @param sublabel whether extent description should appear within main label
-#' @param sameYscale for multi-panel plots, if y-axis scale should be the same
+#'        plotrownum and plotcolnum must be used if length(coltoplot) > 1 to specify layout (e.g., 4 panels could be plotrownum = 2, plotcolnum = 2)
+#' @param sublabel whether optional descriptive information should appear within main label
+#' @param sameYscale set to TRUE for multi-panel plots if consistent y-axis scale is desired.
 #' @param yposadj manual adjustment of position of y-axis label
 #' @param widadj adjust total width of plot
 #' @param hgtadj adjust total height of plot
@@ -31,17 +26,12 @@
 #'         defaults to points, with lines for consecutive years only
 #'         for points only use type = "ptsOnly"
 #'         for all lines use type="allLines"
-#' @param trendAnalysis whether to highlight trend in mean and SD over last 5 years
-#'         default is T unless fewer than 5 years of data
-#' @param propNAallow proportion NAs allowed in trend analysis (defaults to 0.4)
-#               - if proprtion of NAs in last 5 years exceeds this value,
-#                    overrides trendAnalysis=T and will not plot trend
-#' @param redgreen whether or not to include red/green on plot (default is true)
-#' @param anom calculate and plot monthly anomalies
-#'  for monthly anomalies: anom = "mon"
-#'  for standardized monthly anomalies: anom ="stmon"
-#'  @param outname specify alternate output filename (default is same as input)
-#'  @param outtype format for output (defaults to png, pdf also possible)
+#' @param trendAnalysis if TRUE, highlight trend in mean and SD over last 5 years; defaults to TRUE unless fewer than 5 years of data
+#' @param propNAallow if proportion of missing values in last 5 years exceeds this value, overrides trendAnalysis=T and will not plot trend (defaults to 0.4)         -
+#' @param redgreen set to FALSE to remove red/green shading of anomalies from plot
+#' @param anom calculate and plot monthly anomalies; for monthly anomalies use anom = "mon", for standardized monthly anomalies use anom ="stmon"
+#' @param outname specify alternate output filename if input name is not desired
+#' @param outtype format for output ("png", "pdf")
 #'
 #' @keywords
 #'
@@ -61,23 +51,29 @@ plotIndicatorTimeSeries <-  function(filename, coltoplot=2, plotrownum = 1, plot
                                                 outname=NA, outtype="png")  {
 
 # read in file --------------------------------------------------------
-  d1 <- read.table(filename, header=F, sep=",", skip=0, quote="")                 # load data file
-  d <-  read.table(filename, header=F, sep=",", skip=3, quote="")                 # load data file labels
-  d <-  d[rowSums(d[2:ncol(d)], na.rm=T) != 0,]                                   # remove rows with no data
+d1 <- read.table(filename, header=F, sep=",", skip=0, quote="", stringsAsFactors = FALSE)   # load data file
+d <-  read.table(filename, header=F, sep=",", skip=3, quote="", stringsAsFactors = FALSE)   # load data file labels
+d <-  d[rowSums(d[2:ncol(d)], na.rm=T) != 0,]                                   # remove rows with no data
 
-# decide whether monthly or yearly and adjust accordingly -------------
-  tim_all <- d$V1                                                                   # temporal data
-  if (class(tim_all)=="numeric" | class(tim_all)=="integer")  {
-    monthly <- F  }   else  {  monthly <- T  }
+# convert dates to standardized format --------------------
+formatlis <- c("%d%b%Y", "%d%b%y", "%d-%b-%y", "%d-%b-%Y", "%d%y%b")  # list of formats
 
-# if monthly data, parse out months and years in varied formats --------
-    if (monthly==T)  {
-      yrlis <- as.numeric(unlist(regmatches(as.character(tim_all), gregexpr("[[:digit:]]+", as.character(tim_all)))))  # parse out years
-      yrlis[which(yrlis < 1500)] <- yrlis[which(yrlis < 1500)] + 2000                                                  # specify years in 20th century
-      yrlis[which(yrlis > 2050)] <- yrlis[which(yrlis > 2050)] - 100                                                   # specify years in 21st century
-      molis <- matches <- unlist(regmatches(as.character(tim_all), gregexpr("[[:alpha:]]+", as.character(tim_all))))   # parse out months
-    tim_all <- yrlis + (match(tolower(molis), tolower(month.abb))-1)/12    # convert to numerical time format
-    }
+if (class(d$V1[1]) == "integer" & nchar(d$V1[1]) <= 4) {              # is time column values of years?
+  monthly <- FALSE                                                     # if so, monthly F and set time to year
+  tim_all <- d$V1
+  }  else  {                                                          # else need to find and extract month format
+  monthly <- TRUE
+  if (is.na(as.Date(d$V1[1], tryFormats = formatlis, optional = TRUE))) {   # if no day available, add it manually
+    d$V1 <- paste0("1-", d$V1)                                              # adding a day to date string
+    datelis <- as.Date(d$V1, tryFormats = formatlis)                        # convert date
+      } else {
+  datelis <- as.Date(d$V1, tryFormats = formatlis)                          # if day is available then convert date
+      }
+  }
+
+if (monthly==TRUE) {                                                        # if monthly, convert to decimal date
+  tim_all <- as.numeric(substr(datelis, 1, 4)) + ((as.numeric(strftime(datelis, format = "%j")) - 1) / 365)
+}
 
 # adjustment for width ---------------------------------------------------
   if (monthly==F) { wid <- length(tim_all)*2 }  else  { wid <- length(tim_all)/6 }

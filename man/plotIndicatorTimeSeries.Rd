@@ -54,6 +54,8 @@ plotIndicatorTimeSeries(
 
 \item{anom}{a character string indicating whether to convert indicator to monthly anomalies.  One of "none", "mon" (monthly anomalies) or "stmon" (standardized monthly anomalies) can be used.}
 
+\item{dateformat}{a format as defined in \link{strptime} which is used for monthly time steps only.  Can be full date or month/year combination only.}
+
 \item{outname}{a character string specifying alternate output filename; defaults to using indicator label.}
 
 \item{outtype}{a character string specifying format for output, if manual saving is not desired.  Options are "png" or "pdf".}

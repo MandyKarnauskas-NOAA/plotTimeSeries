@@ -19,6 +19,7 @@
 #' @param propNAallow if fraction denoting the allowable proportion of missing values in last 5 years; when the proportion of NAs exceeds this value, trend analysis will not appear (defaults to 0.5)
 #' @param redgreen a logical value indicating whether to remove red/green shading of anomalies from plot.
 #' @param anom a character string indicating whether to convert indicator to monthly anomalies.  One of "none", "mon" (monthly anomalies) or "stmon" (standardized monthly anomalies) can be used.
+#' @param dateformat a format as defined in \link{strptime} which is used for monthly time steps only.  Can be full date or month/year combination only.
 #' @param outname a character string specifying alternate output filename; defaults to using indicator label.
 #' @param outtype a character string specifying format for output, if manual saving is not desired.  Options are "png" or "pdf".
 #'

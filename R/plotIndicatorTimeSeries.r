@@ -52,7 +52,8 @@
 #'  ## plot a four-panel plot of indicator values reported at different locations
 #'  plotIndicatorTimeSeries(bottomDO, outtype="png", coltoplot = c(2:5),
 #'  plotcolnum = 2, plotrownum = 2, sublabel=T, sameYscale=T)
-
+#'  @export
+#'  plotIndicatorTimeSeries()
 
 plotIndicatorTimeSeries <-  function(filename, coltoplot=2, plotrownum = 1, plotcolnum = 1,
                                      sublabel=F, sameYscale=F, yposadj=1, widadj=1, hgtadj=1, type="default",

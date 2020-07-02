@@ -1,54 +1,67 @@
 
 #' Plotting indicator time series
 #'
-#' This function is for standardized plotitng of indicator time series for Ecosystem Status Reports.
-#' Typical formatting used by Alaska Report Card and CC IEA
-#'   Plots time series, values above and below 1 S.D., and mean
-#'   Highlights last 5 years of data and shows pattern in mean and trend
+#' This function is for standardized plotitng of indicator time series, such as those found in NOAA's Ecosystem Status Reports.
+#' The function imports a comma delimited file and plots the time series, denoting mean and values above and below one standard deviation from the mean.
+#' An optional trend analysis highlights changes in the mean and slope of the time series in the last 5 years of data.
 #'
-#' @param filename file in standardized indicator reporting csv format.
+#' @param filename a .csv file in standardized format.
 #'   **Column 1** is time values, **columns 2** and on are indicator data.
-#'   **Row 1** must be indicator name (main title of plot).
-#'   **Row 2** must be units (y-axis label).
-#'   **Row 3** is optional information for sublabel (when multiple panels are used).
-#'   Time can be in year (with century), or monthly time step in a variety of formats (e.g, Jan1986, Jan-86, 1986jan)
+#'   **Row 1** contains a character string of the indicator name (main title of plot).
+#'   **Row 2** contains a character string of the indicator units (y-axis label).
+#'   **Row 3** contains an optional character string with information on the sublabel (when multiple panels are used).
+#'   Time can be in year (with century), or monthly time step in a variety of formats (e.g, Jan1986, Jan-86, 1986jan), including or excluding day of month.
 #'
-#' @param coltoplot column numbers of indicator file to plot (defaults to only column 2)
-#' @param plotrownum number of rows of plots in multi-panel plot
-#' @param plotcolnum number of columns of plots in multi-panel plot
-#'        plotrownum and plotcolnum must be used if length(coltoplot) > 1 to specify layout (e.g., 4 panels could be plotrownum = 2, plotcolnum = 2)
-#' @param sublabel whether optional descriptive information should appear within main label
-#' @param sameYscale set to TRUE for multi-panel plots if consistent y-axis scale is desired.
-#' @param yposadj manual adjustment of position of y-axis label
-#' @param widadj adjust total width of plot
-#' @param hgtadj adjust total height of plot
-#' @param type plot type of lines or points
-#'         defaults to points, with lines for consecutive years only
-#'         for points only use type = "ptsOnly"
-#'         for all lines use type="allLines"
-#' @param trendAnalysis if TRUE, highlight trend in mean and SD over last 5 years; defaults to TRUE unless fewer than 5 years of data
-#' @param propNAallow if proportion of missing values in last 5 years exceeds this value, overrides trendAnalysis=T and will not plot trend (defaults to 0.4)         -
-#' @param redgreen set to FALSE to remove red/green shading of anomalies from plot
-#' @param anom calculate and plot monthly anomalies; for monthly anomalies use anom = "mon", for standardized monthly anomalies use anom ="stmon"
-#' @param outname specify alternate output filename if input name is not desired
-#' @param outtype format for output ("png", "pdf")
+#' @param coltoplot an integer or list of integers defining the column numbers of indicator file to plot.  Defaults to a single column of data in column 2.
+#' @param plotrownum an integer defining the number of rows of plots in a multi-panel plot.
+#' @param plotcolnum an integer defining the number of columns of plots in multi-panel plot.
+#' @param sublabel a logical value indicating whether optional descriptive information should appear within main label.
+#' @param sameYscale a logical value indicating whether a consistent y-axis scale is desired across multiple panels.
+#' @param yposadj a number specifying manual adjustment of position of y-axis label; values >1 move text further from the axis.
+#' @param widadj expansion factor to adjust the total width of plot.
+#' @param hgtadj expansion factor to adjust the total height of plot.
+#' @param type a character string indicating which type of plot is desired. Defaults to points, with lines for consecutive years only.
+#'         "ptsOnly" and "allLines" can be specified.
+#' @param trendAnalysis a logical value indicating whether to highlight the trend in mean and slope over last 5 years; defaults to TRUE unless fewer than 5 years of data.
+#' @param propNAallow if fraction denoting the allowable proportion of missing values in last 5 years; when the proportion of NAs exceeds this value, trend analysis will not appear (defaults to 0.5)
+#' @param redgreen a logical value indicating whether to remove red/green shading of anomalies from plot.
+#' @param anom a character sting indicating whether to convert indicator to monthly anomalies.  One of "none", "mon" (monthly anomalies) or "stmon" (standardized monthly anomalies) can be used.
+#' @param outname a character string specifying alternate output filename, if file input name is not desired.
+#' @param outtype a character string specifying format for output, if manual saving is not desired.  Options are "png" or "pdf"
 #'
 #' @keywords
 #'
 #' @export
 #' @examples
-#'  plotIndicatorTimeSeries("indicator.csv", coltoplot=2:4, plotrownum=3)
-#'  plotIndicatorTimeSeries("amo.csv", coltoplot=2, plotrownum=1, plotcolnum=1, adjlabmain=1, sublabel=F)
-#'  plotIndicatorTimeSeries("aveSocialConnectedness.csv", coltoplot=2, plotrownum=1, plotcolnum=1, sublabel=F)
-#'  plotIndicatorTimeSeries("menhaden_abundance_index.csv", coltoplot=2, plotrownum=1, plotcolnum=1, sublabel=F, yposadj=0.8, widadj=0.8)
-#'  plotIndicatorTimeSeries("seagrass_acreage.csv", coltoplot=2:7, plotrownum=3, plotcolnum=2, adjlabmain=1, sublabel=T, widadj=0.6, trendAnalysis=F)
+#' ## plot a single indicator
+#'  plotIndicatorTimeSeries("indicator.csv")
+#'
+#'  ## plot an indicator with plot adjustments
+#'  plotIndicatorTimeSeries("menhaden_abundance_index.csv", sublabel=F, yposadj=0.8, widadj=0.8)
+#'
+#'  ## plot a six-panel plot of indicator values reported at different locations
+#'  plotIndicatorTimeSeries("seagrass_acreage.csv", coltoplot = 2:7, plotrownum = 3, plotcolnum = 2, widadj = 0.6, sameYaxis = T)
 
 #' function()
 
-plotIndicatorTimeSeries <-  function(filename, coltoplot=2, plotrownum = 1, plotcolnum = 1,
-                                        sublabel=F, sameYscale=F, yposadj=1, widadj=1, hgtadj=1, type="",
-                                            trendAnalysis=T, propNAallow= 0.60, redgreen=T, anom="none",
-                                                outname=NA, outtype="png")  {
+plotIndicatorTimeSeries <-  function(filename)  {
+
+# set default setting for simple 1-panel plot with trend analysis -----
+if (!exists("coltoplot"))   { coltoplot <- 2 }
+if (!exists("plotrownum"))  { plotrownum <- 1 }
+if (!exists("plotcolnum"))  { plotcolnum <- 1 }
+if (!exists("sublabel"))    { sublabel <- FALSE }
+if (!exists("sameYscale"))  { sameYscale <- FALSE }
+if (!exists("yposadj"))     { yposadj <- 1 }
+if (!exists("widadj"))      { widadj <- 1 }
+if (!exists("hgtadj"))      { hgtadj <- 1 }
+if (!exists("type"))        { type <- "" }
+if (!exists("trendAnalysis"))  { trendAnalysis <- TRUE }
+if (!exists("propNAallow")) { propNAallow <- 0.5 }
+if (!exists("redgreen"))    { redgreen <- TRUE }
+if (!exists("anom"))        { anom <- "none" }
+if (!exists("outname"))     { outname <- NA }
+if (!exists("outtype"))     { outtype <- "" }
 
 # read in file --------------------------------------------------------
 d1 <- read.table(filename, header=F, sep=",", skip=0, quote="", stringsAsFactors = FALSE)   # load data file
@@ -67,7 +80,7 @@ if (class(d$V1[1]) == "integer" & nchar(d$V1[1]) <= 4) {              # is time 
     d$V1 <- paste0("1-", d$V1)                                              # adding a day to date string
     datelis <- as.Date(d$V1, tryFormats = formatlis)                        # convert date
       } else {
-  datelis <- as.Date(d$V1, tryFormats = formatlis)                          # if day is available then convert date
+    datelis <- as.Date(d$V1, tryFormats = formatlis)                        # if day is available then convert date
       }
   }
 
@@ -76,7 +89,7 @@ if (monthly==TRUE) {                                                        # if
 }
 
 # adjustment for width ---------------------------------------------------
-  if (monthly==F) { wid <- length(tim_all)*2 }  else  { wid <- length(tim_all)/6 }
+  if (monthly==F) { wid <- length(tim_all)*4 }  else  { wid <- length(tim_all) / 2 }
   if (length(tim_all) <= 10 & length(tim_all) > 5) {  wid <- wid*2  }
   if (length(tim_all) <= 5)  {  wid <- wid*3  }
   wid <- wid * widadj     #  set adjusted width if specified
@@ -122,7 +135,7 @@ if (outtype=="png")  {
 
   # calculate monthly anomalies if specified ------------------------------
     if (anom=="mon")  {
-      moref <- (match(tolower(molis), tolower(month.abb)))
+      moref <- match(strftime(datelis, format="%b"), month.abb)
       moav  <- tapply(co_all, moref, mean, na.rm=T)
         for (m in 1:12) {
           co_all[which(moref==m)] <- co_all[which(moref==m)] - moav[m]    }
@@ -130,7 +143,7 @@ if (outtype=="png")  {
 
   # calculate standardized monthly anomalies if specified ------------------
     if (anom=="stmon")  {
-      moref <- (match(tolower(molis), tolower(month.abb)))
+      moref <- match(strftime(datelis, format="%b"), month.abb)
       moav  <- tapply(co_all, moref, mean, na.rm=T)
       most  <- tapply(co_all, moref, sd, na.rm=T)
         for (m in 1:12) {
@@ -198,7 +211,7 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
         points(tim_all, co_all, pch=20, cex=0.75) }
       if (mean(diff(tim_all)) >  1)  {
         points(tim_all, co_all, pch=20, cex=1.5) }
-        inc <- which(diff(tim_all)==1)
+        inc <- which(diff(tim_all)==1)  # need to fix -  montly vs annual
       for (k in inc)  {
         lines(tim_all[k:(k+1)], co_all[k:(k+1)], lwd=2)  }  }                           # plot time series - lines for yearly steps only
       if (type == "allLines")  {
@@ -311,7 +324,7 @@ if (length(tim) <= 5) {
     par(mar=c(0,0,0,0), xpd=F)
     plot(1, col="white", axes=F, xlab="", ylab="")     }
     }        # end plot for short time series <= 5
-  }          # end missing values check
+   }         # end missing values check
   }          # end looping through indicator columns
 
 # end plot ----------------------

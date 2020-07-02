@@ -2,17 +2,11 @@
 #' Plotting indicator time series
 #'
 #' This function is for standardized plotitng of indicator time series, such as those found in NOAA's Ecosystem Status Reports.
-#' The function imports a comma delimited file and plots the time series, denoting mean and values above and below one standard deviation from the mean.
+#' The function imports a data frame of indicator values and dates and plots the time series, denoting mean and values above and below one standard deviation from the mean.
 #' An optional trend analysis highlights changes in the mean and slope of the time series in the last 5 years of data.
 #'
-#' @param filename a .csv file in standardized format.
-#'   **Column 1** is time values, **columns 2** and on are indicator data.
-#'   **Row 1** contains a character string of the indicator name (main title of plot).
-#'   **Row 2** contains a character string of the indicator units (y-axis label).
-#'   **Row 3** contains an optional character string with information on the sublabel (when multiple panels are used).
-#'   Time can be in year (with century), or monthly time step in a variety of formats (e.g, Jan1986, Jan-86, 1986jan), including or excluding day of month.
-#'
-#' @param coltoplot an integer or list of integers defining the column numbers of indicator file to plot.  Defaults to a single column of data in column 2.
+#' @param filename an object of class 'indicatordata' or a .csv file in standardized format.  See details below.
+#' @param coltoplot an integer or integer list defining the column numbers of indicator file to plot.  Defaults to a single column of data in column 2.
 #' @param plotrownum an integer defining the number of rows of plots in a multi-panel plot.
 #' @param plotcolnum an integer defining the number of columns of plots in multi-panel plot.
 #' @param sublabel a logical value indicating whether optional descriptive information should appear within main label.
@@ -25,13 +19,28 @@
 #' @param trendAnalysis a logical value indicating whether to highlight the trend in mean and slope over last 5 years; defaults to TRUE unless fewer than 5 years of data.
 #' @param propNAallow if fraction denoting the allowable proportion of missing values in last 5 years; when the proportion of NAs exceeds this value, trend analysis will not appear (defaults to 0.5)
 #' @param redgreen a logical value indicating whether to remove red/green shading of anomalies from plot.
-#' @param anom a character sting indicating whether to convert indicator to monthly anomalies.  One of "none", "mon" (monthly anomalies) or "stmon" (standardized monthly anomalies) can be used.
+#' @param anom a character string indicating whether to convert indicator to monthly anomalies.  One of "none", "mon" (monthly anomalies) or "stmon" (standardized monthly anomalies) can be used.
 #' @param outname a character string specifying alternate output filename, if file input name is not desired.
-#' @param outtype a character string specifying format for output, if manual saving is not desired.  Options are "png" or "pdf"
+#' @param outtype a character string specifying format for output, if manual saving is not desired.  Options are "png" or "pdf".
 #'
-#' @keywords
+#' @note
+#' Data can be input directly as a .csv file in the format below, or as an object of class 'indicatordata' which contains two data frames.
+#' \itemize{
+#' \item The first \link{data.frame} contains 3 rows with the indicator name, unit, and sublabel.  Number of columns is equal to the number of indicators.
+#' \item The second \link{data.frame} contains the data; the first column contains the dates and columns 2+ contain the indicator values.
+#' }
+#' A .csv file should be formatted as follows:
+#' \itemize{
+#'  \item **Row 1** contains a character string of the indicator name (main title of plot).
+#'  \item **Row 2** contains a character string of the indicator units (y-axis label).
+#'  \item **Row 3** contains an optional character string with information on the sublabel (when multiple panels are used).
+#'  \item **Column 1** is time values, **columns 2** and on are indicator data.  The first three values of column 1 are NA.
+#'  \item Time can be in year (with century), or monthly time step in a variety of formats (e.g, Jan1986, Jan-86, 1986jan), including or excluding day of month.
+#'  }
 #'
-#' @export
+#' @references
+#' <https://www.aoml.noaa.gov/ocd/ocdweb/ESR_GOMIEA/report/GoM_EcosystemStatusReport2017.pdf>
+#'
 #' @examples
 #' ## plot a single indicator
 #'  plotIndicatorTimeSeries("indicator.csv")
@@ -64,12 +73,23 @@ if (!exists("outname"))     { outname <- NA }
 if (!exists("outtype"))     { outtype <- "" }
 
 # read in file --------------------------------------------------------
-d1 <- read.table(filename, header=F, sep=",", skip=0, quote="", stringsAsFactors = FALSE)   # load data file
-d <-  read.table(filename, header=F, sep=",", skip=3, quote="", stringsAsFactors = FALSE)   # load data file labels
-d <-  d[rowSums(d[2:ncol(d)], na.rm=T) != 0,]                                   # remove rows with no data
+
+if (grep(".csv", filename) == 1)  {                       # if old formula, convert to class indicatordata
+indnames <- read.table(filename, header=F, sep=",", skip=0, quote="", stringsAsFactors = FALSE)[1:3,]   # load data file
+inddata <- read.table(filename, header=F, sep=",", skip=3, quote="", stringsAsFactors = FALSE)   # load data file labels
+s <- list(labels = indnames, dat = inddata)
+class(s) <- "indicatordata"
+  } else {
+    s <- filename
+    s$labels <- cbind(c(NA, NA, NA), s$labels)
+    }
+
+d1 <- s$labels            # use former naming conventions
+d <- s$dat
+# d <- d[rowSums(d[2:ncol(d)], na.rm=T) != 0,]                       # remove rows with no data
 
 # convert dates to standardized format --------------------
-formatlis <- c("%d%b%Y", "%d%b%y", "%d-%b-%y", "%d-%b-%Y", "%d%y%b")  # list of formats
+formatlis <- c("%d%b%Y", "%d%b%y", "%d-%b-%y", "%d-%b-%Y", "%d%y%b", "%d%Y%b", "%d-%y%b", "%d%Y%b")  # list of formats
 
 if (class(d$V1[1]) == "integer" & nchar(d$V1[1]) <= 4) {              # is time column values of years?
   monthly <- FALSE                                                     # if so, monthly F and set time to year
@@ -99,16 +119,23 @@ if (monthly==TRUE) {                                                        # if
                                     { plotcolnum2 <- plotcolnum; plotrownum2 <- plotrownum }
 
 # adjust name for output graphic, if specified ------------------------------
-  if (is.na(outname))  {  filnam <- paste(c(unlist(strsplit(filename, ".csv"))), ".", outtype, sep="") }   else   {
-                          filnam <- outname }
+  if (is.na(outname))  {
+    if (grep(".csv", filename) == 1)  {
+      filnam <- paste0(strsplit(filename, ".csv"), ".", outtype)
+        }   else   {
+        filnam <- paste0(filename, ".", outtype)
+        }  }  else   {
+            filnam <- outname
+            }
 
 # adjust plot size for extra long labels ------------------------------------
-  if (sublabel==T) { mm <- paste(as.character(d1[1,max(coltoplot)]), "\n", as.character(d1[3,max(coltoplot)]), sep="") } else {
-                     mm <- d1[1,max(coltoplot)] }
-    longlabs <- max(nchar(as.character(mm)), nchar(as.character(d1[2,max(coltoplot)])))
+  if (sublabel==T) { mm <- paste(as.character(d1[1,max(coltoplot)]), "\n", as.character(d1[3,max(coltoplot)]), sep="")
+            } else { mm <- d1[1,max(coltoplot)] }
+  longlabs <- max(nchar(as.character(mm)), nchar(as.character(d1[2,max(coltoplot)])))
   if ( longlabs > 30  )  {
     wid <- longlabs/30 * wid
-    hgtadj <- longlabs/30 * hgtadj   }
+    hgtadj <- longlabs/30 * hgtadj
+    }
 
 # open plot window if png is selected format (default) ----------------------
 if (outtype=="png")  {
@@ -133,7 +160,7 @@ if (outtype=="png")  {
 
   co_all <- d[,i]                                                 # data
 
-  # calculate monthly anomalies if specified ------------------------------
+# calculate monthly anomalies if specified ------------------------------
     if (anom=="mon")  {
       moref <- match(strftime(datelis, format="%b"), month.abb)
       moav  <- tapply(co_all, moref, mean, na.rm=T)
@@ -141,7 +168,7 @@ if (outtype=="png")  {
           co_all[which(moref==m)] <- co_all[which(moref==m)] - moav[m]    }
                       }
 
-  # calculate standardized monthly anomalies if specified ------------------
+# calculate standardized monthly anomalies if specified ------------------
     if (anom=="stmon")  {
       moref <- match(strftime(datelis, format="%b"), month.abb)
       moav  <- tapply(co_all, moref, mean, na.rm=T)
@@ -149,8 +176,17 @@ if (outtype=="png")  {
         for (m in 1:12) {
           co_all[which(moref==m)] <- (co_all[which(moref==m)] - moav[m])/most[m]   }
                     }
+# create sublabel ---------------------------------------------------------
+  if (sublabel==T) { mm <- paste(as.character(d1[1,i]), "\n", as.character(d1[3,i]), sep="") } else {
+                     mm <- d1[1,i] }                               # create y-axis label
 
-  # in case of missing values in column -------------------------------------
+yl <- d1[2,i]
+  if (anom=="mon")   { yl <- paste(yl, "\n", "monthly anomaly", sep="") }     # adjust label if monthly anomaly
+  if (anom=="stmon") { yl <- paste(yl, "\n", "standardized monthly anomaly", sep="") }
+
+colind <- c("#FF000080", "#00FF0080")             # shading of anomalies +/- 1 S.D.
+
+# in case of missing values in column -------------------------------------
   if (sum(!is.na(co_all)) == 0) {  plot.new(); plot.new()  }  else  {
 
   tim <- tim_all[!is.na(co_all)]        # for dealing with missing values
@@ -159,23 +195,15 @@ if (outtype=="png")  {
 # start data plot -----------------------------------------------------------
 if (length(tim) > 5) {                  # plotting if more than 5 data points
 
-  if (trendAnalysis==T)  {  par(mar=c(2.5,5,3,0), xpd=F)  }  else  {  par(mar=c(2.5,5,3,1), xpd=F)  }
-
+  if (trendAnalysis==T)  {  par(mar=c(2.5,5,3,0), xpd=F)  }  else  {    # set margins based on trend analysis T or F
+                            par(mar=c(2.5,5,3,1), xpd=F)  }
   par(mgp=c(3*yposadj,1,0))
-
-  if (sublabel==T) { mm <- paste(as.character(d1[1,i]), "\n", as.character(d1[3,i]), sep="") } else {
-                     mm <- d1[1,i] }                               # create y-axis label
-  yl <- d1[2,i]
-    if (anom=="mon")   { yl <- paste(yl, "\n", "monthly anomaly", sep="") }     # adjust label if monthly anomaly
-    if (anom=="stmon") { yl <- paste(yl, "\n", "standardized monthly anomaly", sep="") }
 
   # blank plot with specified y limits
   if (sameYscale==T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin, ymax))    }
   if (sameYscale==F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm)                        }
 
-  colind <- c("#FF000080", "#00FF0080")             # shading of anomalies +/- 1 S.D.
-
-    if (length(tim) >= 5 & redgreen==T) {
+  if (length(tim) >= 5 & redgreen==T) {
 
       # make red and green polygons --------------
       for (j in 2:length(tim))  {  polygon(c(tim[j-1], tim[j], tim[j], tim[j-1]),
@@ -201,22 +229,29 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
                 c((mean(co_all, na.rm=T)-sd(co_all, na.rm=T)),
                   (mean(co_all, na.rm=T)-sd(co_all, na.rm=T)),
                   (mean(co_all, na.rm=T)+sd(co_all, na.rm=T)),
-                  (mean(co_all, na.rm=T)+sd(co_all, na.rm=T))), col="#0000FF20", border=F)       }
+                  (mean(co_all, na.rm=T)+sd(co_all, na.rm=T))), col="#0000FF20", border=F)
+                  }
 
     # plot the points or the lines -----------------------------------------
+  tstep <- round(mean(diff(tim_all)), 3)   # determine time step
     if (type == "ptsOnly")  {
-        points(tim_all, co_all, pch=20, cex=1.5)  }                                                  # plot time series - points
+        points(tim_all, co_all, pch=20, cex=1.5)
+        }            # plot time series - points
     if (type == "")  {
-      if (mean(diff(tim_all)) <= 1)  {
-        points(tim_all, co_all, pch=20, cex=0.75) }
-      if (mean(diff(tim_all)) >  1)  {
-        points(tim_all, co_all, pch=20, cex=1.5) }
-        inc <- which(diff(tim_all)==1)  # need to fix -  montly vs annual
+      if (round(mean(diff(tim)), 3) > tstep)  {
+        points(tim_all, co_all, pch=20, cex=0.75)   # if gaps between time steps, plot small points because lines may not appear
+        }
+      if (round(mean(diff(tim)), 3) == mean(diff(tim_all)))  {
+        points(tim_all, co_all, pch=20, cex=1.5)    # if no gaps between time steps, plot larger pts because lines will connect all
+        }
+        inc <- which(round(diff(tim), 3) == tstep)  # which time steps are equal?
       for (k in inc)  {
-        lines(tim_all[k:(k+1)], co_all[k:(k+1)], lwd=2)  }  }                           # plot time series - lines for yearly steps only
+        lines(tim_all[k:(k+1)], co_all[k:(k+1)], lwd=2)  # plot time series - lines for yearly steps only
+        }  }
       if (type == "allLines")  {
-        lines(tim_all, co_all, lwd=2)
-       points(tim_all, co_all, pch=20, cex=0.75)   }    # plot time series - lines for all years
+        lines(tim, co, lwd=2)               # plot time series - lines for all years
+        points(tim_all, co_all, pch=20, cex=0.75)
+       }
 
     # add parallel lines for mean and sd ---------------------------
     abline(h = mean(co, na.rm=T), lty=8)
@@ -271,21 +306,17 @@ if (length(tim) <= 5) {
 
   par(mgp=c(3*yposadj,1,0))
 
-  if (sublabel==T) { mm <- paste(as.character(d1[1,i]), "\n", as.character(d1[3,i])) } else {
-                     mm <- d1[1,i] }
-  if (sameYscale==T)  {   plot(tim_all, co_all, col=0, axes=F, xlab="", ylab=d1[2,i], main=mm, ylim=c(ymin, ymax))    }                   # plot time series
-  if (sameYscale==F)  {   plot(tim_all, co_all, col=0, axes=F, xlab="", ylab=d1[2,i], main=mm)                        }                   # plot time series
+  # plot time series - blank plot to fill in -------------------------------------
+  if (sameYscale==T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin, ymax))    }
+  if (sameYscale==F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm)                          }
 
   # make red and green polygons --------------------------------------------------
-
-  colind <- c("#FF000080", "#00FF0080")           # shading of anomalies +/- 1 S.D.
-
   if (redgreen==T) {
     for (j in 2:length(tim))  {
       polygon(c(tim[j-1], tim[j], tim[j], tim[j-1]),
            y=c(mean(co, na.rm=T), mean(co, na.rm=T), co[j], co[j-1]),
            col=colind[as.numeric(mean(co[(j-1):j], na.rm=T) > mean(co, na.rm=T))+1], border=F) }
-  }
+    }
 
 # make white square polygon across years ---------------------------------------
   polygon(c(min(tim_all)-5, max(tim_all)+5,
@@ -295,20 +326,26 @@ if (length(tim) <= 5) {
             mean(co_all, na.rm=T)+sd(co_all, na.rm=T),
             mean(co_all, na.rm=T)+sd(co_all, na.rm=T)), col="white", border=T)
 
-# plot the points or the lines -------------------------------------------------
+# plot the points or the lines -----------------------------------------
+  tstep <- round(mean(diff(tim_all)), 3)   # determine time step
   if (type == "ptsOnly")  {
-      points(tim_all, co_all, pch=20, cex=1.5)  }                                                  # plot time series - points
+    points(tim_all, co_all, pch=20, cex=1.5)
+  }            # plot time series - points
   if (type == "")  {
-    if (mean(diff(tim_all)) <= 1)  {
-      points(tim_all, co_all, pch=20, cex=0.75) }
-    if (mean(diff(tim_all)) >  1)  {
-      points(tim_all, co_all, pch=20, cex=1.5) }
-      inc <- which(diff(tim_all)==1)
-      for (k in inc)  {
-        lines(tim_all[k:(k+1)], co_all[k:(k+1)], lwd=2)  }  }                                           # plot time series - lines for yearly steps only
+    if (round(mean(diff(tim)), 3) > tstep)  {
+      points(tim_all, co_all, pch=20, cex=0.75)   # if gaps between time steps, plot small points because lines may not appear
+    }
+    if (round(mean(diff(tim)), 3) == mean(diff(tim_all)))  {
+      points(tim_all, co_all, pch=20, cex=1.5)    # if no gaps between time steps, plot larger pts because lines will connect all
+    }
+    inc <- which(round(diff(tim), 3) == tstep)  # which time steps are equal?
+    for (k in inc)  {
+      lines(tim_all[k:(k+1)], co_all[k:(k+1)], lwd=2)  # plot time series - lines for yearly steps only
+    }  }
   if (type == "allLines")  {
-        lines(tim_all, co_all, lwd=2)
-        points(tim_all, co_all, pch=20, cex=0.75)   }              # plot time series - lines for all years
+    lines(tim, co, lwd=2)               # plot time series - lines for all years
+    points(tim_all, co_all, pch=20, cex=0.75)
+  }
 
 # add mean and SE parallel lines -----------------------------------------------
   abline(h=mean(co, na.rm=T), lty=8)
@@ -319,7 +356,7 @@ if (length(tim) <= 5) {
   axis(1, at=seq(1900, 2050, 1), tck=-0.015, lab=rep("", 151))                                                 # add axes
   axis(2, las=2); box()
 
-  # reset plotting params if additional panels to be plotted and trend analysis set to TRUE
+# reset plotting params if additional panels to be plotted and trend analysis set to TRUE
   if (length(coltoplot) > 1 & trendAnalysis==T)  {
     par(mar=c(0,0,0,0), xpd=F)
     plot(1, col="white", axes=F, xlab="", ylab="")     }
@@ -332,7 +369,8 @@ if (length(tim) <= 5) {
 # for pdf output ---------------------------------------------------------------
 if (outtype=="pdf")  {
   dev.copy(pdf, filnam, width=((wid+10)/7)*plotcolnum2/1.3, height=hgtadj*(3.5*plotrownum2)/1.3)  #, pointsize=12, res=72*4)
-  dev.off()    }                                                                # close graphics device if pdf
+  dev.off()
+  }                                                                # close graphics device if pdf
 
   if (outtype != "") {  dev.off() }   # close graphics device if png
 }

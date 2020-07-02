@@ -4,79 +4,73 @@
 \alias{plotIndicatorTimeSeries}
 \title{Plotting indicator time series}
 \usage{
-plotIndicatorTimeSeries(
-  filename,
-  coltoplot = 2,
-  plotrownum = 1,
-  plotcolnum = 1,
-  sublabel = F,
-  sameYscale = F,
-  yposadj = 1,
-  widadj = 1,
-  hgtadj = 1,
-  type = "",
-  trendAnalysis = T,
-  propNAallow = 0.6,
-  redgreen = T,
-  anom = "none",
-  outname = NA,
-  outtype = "png"
-)
+plotIndicatorTimeSeries(filename)
 }
 \arguments{
-\item{filename}{file in standardized indicator reporting csv format.
-\strong{Column 1} is time values, \strong{columns 2} and on are indicator data.
-\strong{Row 1} must be indicator name (main title of plot).
-\strong{Row 2} must be units (y-axis label).
-\strong{Row 3} is optional information for sublabel (when multiple panels are used).
-Time can be in year (with century), or monthly time step in a variety of formats (e.g, Jan1986, Jan-86, 1986jan)}
+\item{filename}{an object of class 'indicatordata' or a .csv file in standardized format.  See details below.}
 
-\item{coltoplot}{column numbers of indicator file to plot (defaults to only column 2)}
+\item{coltoplot}{an integer or integer list defining the column numbers of indicator file to plot.  Defaults to a single column of data in column 2.}
 
-\item{plotrownum}{number of rows of plots in multi-panel plot}
+\item{plotrownum}{an integer defining the number of rows of plots in a multi-panel plot.}
 
-\item{plotcolnum}{number of columns of plots in multi-panel plot
-plotrownum and plotcolnum must be used if length(coltoplot) > 1 to specify layout (e.g., 4 panels could be plotrownum = 2, plotcolnum = 2)}
+\item{plotcolnum}{an integer defining the number of columns of plots in multi-panel plot.}
 
-\item{sublabel}{whether optional descriptive information should appear within main label}
+\item{sublabel}{a logical value indicating whether optional descriptive information should appear within main label.}
 
-\item{sameYscale}{set to TRUE for multi-panel plots if consistent y-axis scale is desired.}
+\item{sameYscale}{a logical value indicating whether a consistent y-axis scale is desired across multiple panels.}
 
-\item{yposadj}{manual adjustment of position of y-axis label}
+\item{yposadj}{a number specifying manual adjustment of position of y-axis label; values >1 move text further from the axis.}
 
-\item{widadj}{adjust total width of plot}
+\item{widadj}{expansion factor to adjust the total width of plot.}
 
-\item{hgtadj}{adjust total height of plot}
+\item{hgtadj}{expansion factor to adjust the total height of plot.}
 
-\item{type}{plot type of lines or points
-defaults to points, with lines for consecutive years only
-for points only use type = "ptsOnly"
-for all lines use type="allLines"}
+\item{type}{a character string indicating which type of plot is desired. Defaults to points, with lines for consecutive years only.
+"ptsOnly" and "allLines" can be specified.}
 
-\item{trendAnalysis}{if TRUE, highlight trend in mean and SD over last 5 years; defaults to TRUE unless fewer than 5 years of data}
+\item{trendAnalysis}{a logical value indicating whether to highlight the trend in mean and slope over last 5 years; defaults to TRUE unless fewer than 5 years of data.}
 
-\item{propNAallow}{if proportion of missing values in last 5 years exceeds this value, overrides trendAnalysis=T and will not plot trend (defaults to 0.4)         -}
+\item{propNAallow}{if fraction denoting the allowable proportion of missing values in last 5 years; when the proportion of NAs exceeds this value, trend analysis will not appear (defaults to 0.5)}
 
-\item{redgreen}{set to FALSE to remove red/green shading of anomalies from plot}
+\item{redgreen}{a logical value indicating whether to remove red/green shading of anomalies from plot.}
 
-\item{anom}{calculate and plot monthly anomalies; for monthly anomalies use anom = "mon", for standardized monthly anomalies use anom ="stmon"}
+\item{anom}{a character string indicating whether to convert indicator to monthly anomalies.  One of "none", "mon" (monthly anomalies) or "stmon" (standardized monthly anomalies) can be used.}
 
-\item{outname}{specify alternate output filename if input name is not desired}
+\item{outname}{a character string specifying alternate output filename, if file input name is not desired.}
 
-\item{outtype}{format for output ("png", "pdf")}
+\item{outtype}{a character string specifying format for output, if manual saving is not desired.  Options are "png" or "pdf".}
 }
 \description{
-This function is for standardized plotitng of indicator time series for Ecosystem Status Reports.
-Typical formatting used by Alaska Report Card and CC IEA
-Plots time series, values above and below 1 S.D., and mean
-Highlights last 5 years of data and shows pattern in mean and trend
+This function is for standardized plotitng of indicator time series, such as those found in NOAA's Ecosystem Status Reports.
+The function imports a data frame of indicator values and dates and plots the time series, denoting mean and values above and below one standard deviation from the mean.
+An optional trend analysis highlights changes in the mean and slope of the time series in the last 5 years of data.
+}
+\note{
+Data can be input directly as a .csv file in the format below, or as an object of class 'indicatordata' which contains two data frames.
+\itemize{
+\item The first \link{data.frame} contains 3 rows with the indicator name, unit, and sublabel.  Number of columns is equal to the number of indicators.
+\item The second \link{data.frame} contains the data; the first column contains the dates and columns 2+ contain the indicator values.
+}
+A .csv file should be formatted as follows:
+\itemize{
+\item \strong{Row 1} contains a character string of the indicator name (main title of plot).
+\item \strong{Row 2} contains a character string of the indicator units (y-axis label).
+\item \strong{Row 3} contains an optional character string with information on the sublabel (when multiple panels are used).
+\item \strong{Column 1} is time values, \strong{columns 2} and on are indicator data.  The first three values of column 1 are NA.
+\item Time can be in year (with century), or monthly time step in a variety of formats (e.g, Jan1986, Jan-86, 1986jan), including or excluding day of month.
+}
 }
 \examples{
- plotIndicatorTimeSeries("indicator.csv", coltoplot=2:4, plotrownum=3)
- plotIndicatorTimeSeries("amo.csv", coltoplot=2, plotrownum=1, plotcolnum=1, adjlabmain=1, sublabel=F)
- plotIndicatorTimeSeries("aveSocialConnectedness.csv", coltoplot=2, plotrownum=1, plotcolnum=1, sublabel=F)
- plotIndicatorTimeSeries("menhaden_abundance_index.csv", coltoplot=2, plotrownum=1, plotcolnum=1, sublabel=F, yposadj=0.8, widadj=0.8)
- plotIndicatorTimeSeries("seagrass_acreage.csv", coltoplot=2:7, plotrownum=3, plotcolnum=2, adjlabmain=1, sublabel=T, widadj=0.6, trendAnalysis=F)
+## plot a single indicator
+ plotIndicatorTimeSeries("indicator.csv")
+
+ ## plot an indicator with plot adjustments
+ plotIndicatorTimeSeries("menhaden_abundance_index.csv", sublabel=F, yposadj=0.8, widadj=0.8)
+
+ ## plot a six-panel plot of indicator values reported at different locations
+ plotIndicatorTimeSeries("seagrass_acreage.csv", coltoplot = 2:7, plotrownum = 3, plotcolnum = 2, widadj = 0.6, sameYaxis = T)
 function()
 }
-\keyword{}
+\references{
+\url{https://www.aoml.noaa.gov/ocd/ocdweb/ESR_GOMIEA/report/GoM_EcosystemStatusReport2017.pdf}
+}

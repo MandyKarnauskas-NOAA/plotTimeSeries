@@ -91,8 +91,6 @@ A .csv file should be formatted as follows:
  ## plot a four-panel plot of indicator values reported at different locations
  plotIndicatorTimeSeries(bottomDO, outtype="png", coltoplot = c(2:5),
  plotcolnum = 2, plotrownum = 2, sublabel=T, sameYscale=T)
-
-function()
 }
 \references{
 \url{https://www.aoml.noaa.gov/ocd/ocdweb/ESR_GOMIEA/report/GoM_EcosystemStatusReport2017.pdf}

@@ -4,7 +4,25 @@
 \alias{plotIndicatorTimeSeries}
 \title{Plotting indicator time series}
 \usage{
-plotIndicatorTimeSeries(filename)
+plotIndicatorTimeSeries(
+  filename,
+  coltoplot = 2,
+  plotrownum = 1,
+  plotcolnum = 1,
+  sublabel = F,
+  sameYscale = F,
+  yposadj = 1,
+  widadj = 1,
+  hgtadj = 1,
+  type = "default",
+  trendAnalysis = T,
+  propNAallow = 0.6,
+  redgreen = T,
+  anom = "none",
+  dateformat = "\%b\%Y",
+  outname = NA,
+  outtype = ""
+)
 }
 \arguments{
 \item{filename}{an object of class 'indicatordata' or a .csv file in standardized format.  See details below.}
@@ -36,7 +54,7 @@ plotIndicatorTimeSeries(filename)
 
 \item{anom}{a character string indicating whether to convert indicator to monthly anomalies.  One of "none", "mon" (monthly anomalies) or "stmon" (standardized monthly anomalies) can be used.}
 
-\item{outname}{a character string specifying alternate output filename, if file input name is not desired.}
+\item{outname}{a character string specifying alternate output filename; defaults to using indicator label.}
 
 \item{outtype}{a character string specifying format for output, if manual saving is not desired.  Options are "png" or "pdf".}
 }
@@ -62,13 +80,16 @@ A .csv file should be formatted as follows:
 }
 \examples{
 ## plot a single indicator
- plotIndicatorTimeSeries("indicator.csv")
+ plotIndicatorTimeSeries(menhaden)
 
- ## plot an indicator with plot adjustments
- plotIndicatorTimeSeries("menhaden_abundance_index.csv", sublabel=F, yposadj=0.8, widadj=0.8)
+ ## plot an indicator, compare with plot of standardized anomalies
+ plotIndicatorTimeSeries(NPP)
+ plotIndicatorTimeSeries(NPP, anom="stmon")
 
- ## plot a six-panel plot of indicator values reported at different locations
- plotIndicatorTimeSeries("seagrass_acreage.csv", coltoplot = 2:7, plotrownum = 3, plotcolnum = 2, widadj = 0.6, sameYaxis = T)
+ ## plot a four-panel plot of indicator values reported at different locations
+ plotIndicatorTimeSeries(bottomDO, outtype="png", coltoplot = c(2:5),
+ plotcolnum = 2, plotrownum = 2, sublabel=T, sameYscale=T)
+
 function()
 }
 \references{

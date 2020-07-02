@@ -1,4 +1,3 @@
-
 #' Plotting indicator time series
 #'
 #' This function is for standardized plotitng of indicator time series, such as those found in NOAA's Ecosystem Status Reports.
@@ -20,7 +19,7 @@
 #' @param propNAallow if fraction denoting the allowable proportion of missing values in last 5 years; when the proportion of NAs exceeds this value, trend analysis will not appear (defaults to 0.5)
 #' @param redgreen a logical value indicating whether to remove red/green shading of anomalies from plot.
 #' @param anom a character string indicating whether to convert indicator to monthly anomalies.  One of "none", "mon" (monthly anomalies) or "stmon" (standardized monthly anomalies) can be used.
-#' @param outname a character string specifying alternate output filename, if file input name is not desired.
+#' @param outname a character string specifying alternate output filename; defaults to using indicator label.
 #' @param outtype a character string specifying format for output, if manual saving is not desired.  Options are "png" or "pdf".
 #'
 #' @note
@@ -43,38 +42,25 @@
 #'
 #' @examples
 #' ## plot a single indicator
-#'  plotIndicatorTimeSeries("indicator.csv")
+#'  plotIndicatorTimeSeries(menhaden)
 #'
-#'  ## plot an indicator with plot adjustments
-#'  plotIndicatorTimeSeries("menhaden_abundance_index.csv", sublabel=F, yposadj=0.8, widadj=0.8)
+#'  ## plot an indicator, compare with plot of standardized anomalies
+#'  plotIndicatorTimeSeries(NPP)
+#'  plotIndicatorTimeSeries(NPP, anom="stmon")
 #'
-#'  ## plot a six-panel plot of indicator values reported at different locations
-#'  plotIndicatorTimeSeries("seagrass_acreage.csv", coltoplot = 2:7, plotrownum = 3, plotcolnum = 2, widadj = 0.6, sameYaxis = T)
-
+#'  ## plot a four-panel plot of indicator values reported at different locations
+#'  plotIndicatorTimeSeries(bottomDO, outtype="png", coltoplot = c(2:5),
+#'  plotcolnum = 2, plotrownum = 2, sublabel=T, sameYscale=T)
+#'
 #' function()
-
-plotIndicatorTimeSeries <-  function(filename)  {
-
-# set default setting for simple 1-panel plot with trend analysis -----
-if (!exists("coltoplot"))   { coltoplot <- 2 }
-if (!exists("plotrownum"))  { plotrownum <- 1 }
-if (!exists("plotcolnum"))  { plotcolnum <- 1 }
-if (!exists("sublabel"))    { sublabel <- FALSE }
-if (!exists("sameYscale"))  { sameYscale <- FALSE }
-if (!exists("yposadj"))     { yposadj <- 1 }
-if (!exists("widadj"))      { widadj <- 1 }
-if (!exists("hgtadj"))      { hgtadj <- 1 }
-if (!exists("type"))        { type <- "" }
-if (!exists("trendAnalysis"))  { trendAnalysis <- TRUE }
-if (!exists("propNAallow")) { propNAallow <- 0.5 }
-if (!exists("redgreen"))    { redgreen <- TRUE }
-if (!exists("anom"))        { anom <- "none" }
-if (!exists("outname"))     { outname <- NA }
-if (!exists("outtype"))     { outtype <- "" }
+plotIndicatorTimeSeries <-  function(filename, coltoplot=2, plotrownum = 1, plotcolnum = 1,
+                                     sublabel=F, sameYscale=F, yposadj=1, widadj=1, hgtadj=1, type="default",
+                                     trendAnalysis=T, propNAallow= 0.60, redgreen=T, anom="none",
+                                     dateformat="%b%Y", outname=NA, outtype="")  {
 
 # read in file --------------------------------------------------------
 
-if (grep(".csv", filename) == 1)  {                       # if old formula, convert to class indicatordata
+if (class(filename) != "indicatordata")  {                       # if old formula, convert to class indicatordata
 indnames <- read.table(filename, header=F, sep=",", skip=0, quote="", stringsAsFactors = FALSE)[1:3,]   # load data file
 inddata <- read.table(filename, header=F, sep=",", skip=3, quote="", stringsAsFactors = FALSE)   # load data file labels
 s <- list(labels = indnames, dat = inddata)
@@ -89,7 +75,7 @@ d <- s$dat
 # d <- d[rowSums(d[2:ncol(d)], na.rm=T) != 0,]                       # remove rows with no data
 
 # convert dates to standardized format --------------------
-formatlis <- c("%d%b%Y", "%d%b%y", "%d-%b-%y", "%d-%b-%Y", "%d%y%b", "%d%Y%b", "%d-%y%b", "%d%Y%b")  # list of formats
+formatlis <- c(dateformat)  # list of formats
 
 if (class(d$V1[1]) == "integer" & nchar(d$V1[1]) <= 4) {              # is time column values of years?
   monthly <- FALSE                                                     # if so, monthly F and set time to year
@@ -98,9 +84,9 @@ if (class(d$V1[1]) == "integer" & nchar(d$V1[1]) <= 4) {              # is time 
   monthly <- TRUE
   if (is.na(as.Date(d$V1[1], tryFormats = formatlis, optional = TRUE))) {   # if no day available, add it manually
     d$V1 <- paste0("1-", d$V1)                                              # adding a day to date string
-    datelis <- as.Date(d$V1, tryFormats = formatlis)                        # convert date
+    datelis <- as.Date(d$V1, tryFormats =  paste0("%d-", formatlis))                        # convert date
       } else {
-    datelis <- as.Date(d$V1, tryFormats = formatlis)                        # if day is available then convert date
+    datelis <- as.Date(d$V1, tryFormats =  paste0("%d-", formatlis))                        # if day is available then convert date
       }
   }
 
@@ -109,7 +95,7 @@ if (monthly==TRUE) {                                                        # if
 }
 
 # adjustment for width ---------------------------------------------------
-  if (monthly==F) { wid <- length(tim_all)*4 }  else  { wid <- length(tim_all) / 2 }
+  if (monthly==F) { wid <- length(tim_all) * 1.5 }  else  { wid <- length(tim_all) / 6 }
   if (length(tim_all) <= 10 & length(tim_all) > 5) {  wid <- wid*2  }
   if (length(tim_all) <= 5)  {  wid <- wid*3  }
   wid <- wid * widadj     #  set adjusted width if specified
@@ -120,13 +106,8 @@ if (monthly==TRUE) {                                                        # if
 
 # adjust name for output graphic, if specified ------------------------------
   if (is.na(outname))  {
-    if (grep(".csv", filename) == 1)  {
-      filnam <- paste0(strsplit(filename, ".csv"), ".", outtype)
-        }   else   {
-        filnam <- paste0(filename, ".", outtype)
-        }  }  else   {
-            filnam <- outname
-            }
+        filnam <- paste0(s$labels[1,2], ".", outtype)
+        }
 
 # adjust plot size for extra long labels ------------------------------------
   if (sublabel==T) { mm <- paste(as.character(d1[1,max(coltoplot)]), "\n", as.character(d1[3,max(coltoplot)]), sep="")
@@ -233,21 +214,22 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
                   }
 
     # plot the points or the lines -----------------------------------------
-  tstep <- round(mean(diff(tim_all)), 3)   # determine time step
+  tstep <- round(mean(diff(tim_all)), 2)   # determine time step
     if (type == "ptsOnly")  {
         points(tim_all, co_all, pch=20, cex=1.5)
         }            # plot time series - points
-    if (type == "")  {
-      if (round(mean(diff(tim)), 3) > tstep)  {
+    if (type == "default")  {
+      if (round(mean(diff(tim)), 2) > tstep)  {
         points(tim_all, co_all, pch=20, cex=0.75)   # if gaps between time steps, plot small points because lines may not appear
         }
-      if (round(mean(diff(tim)), 3) == mean(diff(tim_all)))  {
+      if (round(mean(diff(tim)), 2) == tstep)  {
         points(tim_all, co_all, pch=20, cex=1.5)    # if no gaps between time steps, plot larger pts because lines will connect all
         }
-        inc <- which(round(diff(tim), 3) == tstep)  # which time steps are equal?
+        inc <- which(round(diff(tim), 2) <= tstep)  # which time steps are equal?
       for (k in inc)  {
         lines(tim_all[k:(k+1)], co_all[k:(k+1)], lwd=2)  # plot time series - lines for yearly steps only
-        }  }
+      }
+        }
       if (type == "allLines")  {
         lines(tim, co, lwd=2)               # plot time series - lines for all years
         points(tim_all, co_all, pch=20, cex=0.75)
@@ -327,21 +309,22 @@ if (length(tim) <= 5) {
             mean(co_all, na.rm=T)+sd(co_all, na.rm=T)), col="white", border=T)
 
 # plot the points or the lines -----------------------------------------
-  tstep <- round(mean(diff(tim_all)), 3)   # determine time step
+  tstep <- round(mean(diff(tim_all)), 2)   # determine time step
   if (type == "ptsOnly")  {
     points(tim_all, co_all, pch=20, cex=1.5)
   }            # plot time series - points
-  if (type == "")  {
-    if (round(mean(diff(tim)), 3) > tstep)  {
+  if (type == "default")  {
+    if (round(mean(diff(tim)), 2) > tstep)  {
       points(tim_all, co_all, pch=20, cex=0.75)   # if gaps between time steps, plot small points because lines may not appear
     }
-    if (round(mean(diff(tim)), 3) == mean(diff(tim_all)))  {
+    if (round(mean(diff(tim)), 2) == tstep)  {
       points(tim_all, co_all, pch=20, cex=1.5)    # if no gaps between time steps, plot larger pts because lines will connect all
     }
-    inc <- which(round(diff(tim), 3) == tstep)  # which time steps are equal?
+    inc <- which(round(diff(tim), 2) <= tstep)  # which time steps are equal?
     for (k in inc)  {
       lines(tim_all[k:(k+1)], co_all[k:(k+1)], lwd=2)  # plot time series - lines for yearly steps only
-    }  }
+    }
+  }
   if (type == "allLines")  {
     lines(tim, co, lwd=2)               # plot time series - lines for all years
     points(tim_all, co_all, pch=20, cex=0.75)
@@ -372,10 +355,10 @@ if (outtype=="pdf")  {
   dev.off()
   }                                                                # close graphics device if pdf
 
-  if (outtype != "") {  dev.off() }   # close graphics device if png
+  if (outtype == "png") {  dev.off() }   # close graphics device if png
+
 }
 
-knitr::opts_chunk$set(echo = F, warning = F, message = F)                       # fix suggested by B. Best
 
 # end of function
 

@@ -37,23 +37,23 @@
 #'  \item **Column 1** is time values, **columns 2** and on are indicator data.  The first three values of column 1 are NA.
 #'  \item Time can be in year (with century), or monthly time step in a variety of formats (e.g, Jan1986, Jan-86, 1986jan), including or excluding day of month.
 #'  }
-#'
 #' @references
 #' <https://www.aoml.noaa.gov/ocd/ocdweb/ESR_GOMIEA/report/GoM_EcosystemStatusReport2017.pdf>
-#'
+#' @export
 #' @examples
 #' ## plot a single indicator
-#'  plotIndicatorTimeSeries(menhaden)
+#' plotIndicatorTimeSeries(menhaden)
 #'
-#'  ## plot an indicator, compare with plot of standardized anomalies
-#'  plotIndicatorTimeSeries(NPP)
-#'  plotIndicatorTimeSeries(NPP, anom="stmon")
+#' ## plot an indicator, compare with plot of standardized anomalies
+#' plotIndicatorTimeSeries(NPP)
+#' plotIndicatorTimeSeries(NPP, anom="stmon")
 #'
-#'  ## plot a four-panel plot of indicator values reported at different locations
-#'  plotIndicatorTimeSeries(bottomDO, outtype="png", coltoplot = c(2:5),
-#'  plotcolnum = 2, plotrownum = 2, sublabel=T, sameYscale=T)
+#' ## plot a four-panel plot of indicator values reported at different locations
+#' plotIndicatorTimeSeries(bottomDO, outtype="png", coltoplot = c(2:5),
+#' plotcolnum = 2, plotrownum = 2, sublabel=T, sameYscale=T)
 #'
-#'  function()
+#' plotIndicatorTimeSeries()
+
 plotIndicatorTimeSeries <-  function(filename, coltoplot=2, plotrownum = 1, plotcolnum = 1,
                                      sublabel=F, sameYscale=F, yposadj=1, widadj=1, hgtadj=1, type="default",
                                      trendAnalysis=T, propNAallow= 0.60, redgreen=T, anom="none",

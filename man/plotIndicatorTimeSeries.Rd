@@ -82,17 +82,17 @@ A .csv file should be formatted as follows:
 }
 \examples{
 ## plot a single indicator
- plotIndicatorTimeSeries(menhaden)
+plotIndicatorTimeSeries(menhaden)
 
- ## plot an indicator, compare with plot of standardized anomalies
- plotIndicatorTimeSeries(NPP)
- plotIndicatorTimeSeries(NPP, anom="stmon")
+## plot an indicator, compare with plot of standardized anomalies
+plotIndicatorTimeSeries(NPP)
+plotIndicatorTimeSeries(NPP, anom="stmon")
 
- ## plot a four-panel plot of indicator values reported at different locations
- plotIndicatorTimeSeries(bottomDO, outtype="png", coltoplot = c(2:5),
- plotcolnum = 2, plotrownum = 2, sublabel=T, sameYscale=T)
+## plot a four-panel plot of indicator values reported at different locations
+plotIndicatorTimeSeries(bottomDO, outtype="png", coltoplot = c(2:5),
+plotcolnum = 2, plotrownum = 2, sublabel=T, sameYscale=T)
 
- function()
+plotIndicatorTimeSeries()
 }
 \references{
 \url{https://www.aoml.noaa.gov/ocd/ocdweb/ESR_GOMIEA/report/GoM_EcosystemStatusReport2017.pdf}

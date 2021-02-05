@@ -13,9 +13,10 @@
 #' @param yposadj a number specifying manual adjustment of position of y-axis label; values >1 move text further from the axis.
 #' @param widadj expansion factor to adjust the total width of plot.
 #' @param hgtadj expansion factor to adjust the total height of plot.
-#' @param type a character string indicating which type of plot is desired. Defaults to points, with lines for consecutive years only.
+#' @param type a character string indicating which type of plot is desired. Defaults to points, with lines for consecutive time steps only.
 #'         "ptsOnly" and "allLines" can be specified.
 #' @param trendAnalysis a logical value indicating whether to highlight the trend in mean and slope over last 5 years; defaults to TRUE unless fewer than 5 years of data.
+#' @param tWindow an integer defining the number of years over which the recent trend analysis should be calculated; defaults to last 5 years.
 #' @param propNAallow if fraction denoting the allowable proportion of missing values in last 5 years; when the proportion of NAs exceeds this value, trend analysis will not appear (defaults to 0.5)
 #' @param redgreen a logical value indicating whether to remove red/green shading of anomalies from plot.
 #' @param anom a character string indicating whether to convert indicator to monthly anomalies.  One of "none", "mon" (monthly anomalies) or "stmon" (standardized monthly anomalies) can be used.
@@ -55,7 +56,7 @@
 #'  @export
 plotIndicatorTimeSeries <-  function(filename, coltoplot=2, plotrownum = 1, plotcolnum = 1,
                                      sublabel=F, sameYscale=F, yposadj=1, widadj=1, hgtadj=1, type="default",
-                                     trendAnalysis=T, propNAallow= 0.60, redgreen=T, anom="none",
+                                     trendAnalysis=T, tWindow = 5, propNAallow= 0.60, redgreen=T, anom="none",
                                      dateformat="%b%Y", outname=NA, outtype="")  {
 
 # read in file --------------------------------------------------------
@@ -72,7 +73,6 @@ class(s) <- "indicatordata"
 
 d1 <- s$labels            # use former naming conventions
 d <- s$dat
-# d <- d[rowSums(d[2:ncol(d)], na.rm=T) != 0,]                       # remove rows with no data
 
 # convert dates to standardized format --------------------
 formatlis <- c(dateformat)  # list of formats
@@ -120,7 +120,8 @@ if (monthly==TRUE) {                                                        # if
 
 # open plot window if png is selected format (default) ----------------------
 if (outtype=="png")  {
-  png(filename = filnam, units = "in", width = ((wid+10)/7)*plotcolnum2/1.3, height = hgtadj * (3.5*plotrownum2)/1.3, pointsize = 12, res = 72*4) }
+  png(filename = filnam, units = "in", pointsize = 12, res = 72*4,
+      width = ((wid+10)/7)*plotcolnum2/1.3, height = hgtadj * (3.5*plotrownum2)/1.3) }
 
 # layout for single or multi-panel plots ------------------------------------
   nf <- layout(matrix(c(1:(plotrownum*plotcolnum*2)), plotrownum, plotcolnum*2, byrow = TRUE), rep(c(wid/5, 1), plotcolnum), rep(4, plotrownum))
@@ -203,10 +204,10 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
 
     # make blue window in last 5 years ----------
     if (trendAnalysis==T)  {
-      polygon(c(max(tim_all, na.rm=T)-4.5-as.numeric(monthly)/2.1,
+      polygon(c(max(tim_all, na.rm=T)-tWindow+0.5-as.numeric(monthly)/2.1,
                 max(tim_all, na.rm=T)+0.5-as.numeric(monthly)/2.4,
                 max(tim_all, na.rm=T)+0.5-as.numeric(monthly)/2.4,
-                max(tim_all, na.rm=T)-4.5-as.numeric(monthly)/2.1),
+                max(tim_all, na.rm=T)-tWindow+0.5-as.numeric(monthly)/2.1),
                 c((mean(co_all, na.rm=T)-sd(co_all, na.rm=T)),
                   (mean(co_all, na.rm=T)-sd(co_all, na.rm=T)),
                   (mean(co_all, na.rm=T)+sd(co_all, na.rm=T)),
@@ -219,14 +220,15 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
         points(tim_all, co_all, pch=20, cex=1.5)
         }            # plot time series - points
     if (type == "default")  {
-      if (round(mean(diff(tim)), 2) > tstep)  {
+      if (round(mean(diff(tim)), 2) >= tstep)  {
         points(tim_all, co_all, pch=20, cex=0.75)   # if gaps between time steps, plot small points because lines may not appear
         }
       if (round(mean(diff(tim)), 2) == tstep)  {
         points(tim_all, co_all, pch=20, cex=1.5)    # if no gaps between time steps, plot larger pts because lines will connect all
         }
-        inc <- which(round(diff(tim), 2) <= tstep)  # which time steps are equal?
-      for (k in inc)  {
+        inc <- tim[which(round(diff(tim), 2) <= tstep)]  # which time steps are equal?
+      for (n in inc)  {
+        k <- which(tim_all == n)
         lines(tim_all[k:(k+1)], co_all[k:(k+1)], lwd=2)  # plot time series - lines for yearly steps only
       }
         }
@@ -251,8 +253,8 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
   if (trendAnalysis==T)  {
   par(mar=c(2.5,0,3,0))                                                         #  second panel on mean and trend of last 5 years
 
-  last5 <-     co_all[which(tim_all > max(tim_all)-5)]
-  last5tim <- tim_all[which(tim_all > max(tim_all)-5)]
+  last5 <-     co_all[which(tim_all > max(tim_all)-tWindow)]
+  last5tim <- tim_all[which(tim_all > max(tim_all)-tWindow)]
 
   plot(1, xlim=c(0.94,1.06), ylim=c(0.6, 1.6), col=0, axes=F, xlab="", ylab="")  # create empty plot
 
@@ -265,11 +267,11 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
     text(1, 1.2, col="white", "-", cex=2.6, font=2) }                # below mean -1se last 5 years
 
     res <- summary(lm(last5 ~ last5tim))     # calculate linear trend last 5 years
-    slope <- coef(res)[2,1] * 5              # slope in per year unit * 5 years (this is total rise over 5-yr run)
+    slope <- coef(res)[2,1] * tWindow              # slope in per year unit * 5 years (this is total rise over 5-yr run)
     slopelim <- sd(co, na.rm=T)              # is linear trend > 1 se?
 
     # Note!!  The specific comparison coded here references the linear regression rate of change
-    # calculated over the 5-year period, versus the standard deviation of entire time series.
+    # calculated over the specified window in years, versus the standard deviation of entire time series.
       if (slope >  slopelim)  {
         arrows(0.98, 0.89, x1 = 1.02, y1 = 1.01, length = 0.08, angle = 45, code = 2, lwd = 3)  }   # add up arrow for positive trend
       if (slope <  -slopelim) {
@@ -320,11 +322,12 @@ if (length(tim) <= 5) {
     if (round(mean(diff(tim)), 2) == tstep)  {
       points(tim_all, co_all, pch=20, cex=1.5)    # if no gaps between time steps, plot larger pts because lines will connect all
     }
-    inc <- which(round(diff(tim), 2) <= tstep)  # which time steps are equal?
-    for (k in inc)  {
+    inc <- tim[which(round(diff(tim), 2) <= tstep)]  # which time steps are equal?
+    for (n in inc)  {
+      k <- which(tim_all == n)
       lines(tim_all[k:(k+1)], co_all[k:(k+1)], lwd=2)  # plot time series - lines for yearly steps only
+      }
     }
-  }
   if (type == "allLines")  {
     lines(tim, co, lwd=2)               # plot time series - lines for all years
     points(tim_all, co_all, pch=20, cex=0.75)

@@ -16,6 +16,7 @@ plotIndicatorTimeSeries(
   hgtadj = 1,
   type = "default",
   trendAnalysis = T,
+  tWindow = 5,
   propNAallow = 0.6,
   redgreen = T,
   anom = "none",
@@ -43,10 +44,12 @@ plotIndicatorTimeSeries(
 
 \item{hgtadj}{expansion factor to adjust the total height of plot.}
 
-\item{type}{a character string indicating which type of plot is desired. Defaults to points, with lines for consecutive years only.
+\item{type}{a character string indicating which type of plot is desired. Defaults to points, with lines for consecutive time steps only.
 "ptsOnly" and "allLines" can be specified.}
 
 \item{trendAnalysis}{a logical value indicating whether to highlight the trend in mean and slope over last 5 years; defaults to TRUE unless fewer than 5 years of data.}
+
+\item{tWindow}{an integer defining the number of years over which the recent trend analysis should be calculated; defaults to last 5 years.}
 
 \item{propNAallow}{if fraction denoting the allowable proportion of missing values in last 5 years; when the proportion of NAs exceeds this value, trend analysis will not appear (defaults to 0.5)}
 

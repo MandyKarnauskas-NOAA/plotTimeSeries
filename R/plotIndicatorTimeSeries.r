@@ -2,7 +2,7 @@
 #'
 #' This function is for standardized plotitng of indicator time series, such as those found in NOAA's Ecosystem Status Reports.
 #' The function imports a data frame of indicator values and dates and plots the time series, denoting mean and values above and below one standard deviation from the mean.
-#' An optional trend analysis highlights changes in the mean and slope of the time series in the last 5 years of data.
+#' An optional trend analysis highlights changes in the mean and slope of the time series in the last 5 years of data (or other specified window).
 #'
 #' @param filename an object of class 'indicatordata' or a .csv file in standardized format.  See details below.
 #' @param coltoplot an integer or integer list defining the column numbers of indicator file to plot.  Defaults to a single column of data in column 2.

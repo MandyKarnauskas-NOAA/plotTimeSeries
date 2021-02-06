@@ -262,9 +262,9 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
   if (sum(is.na(last5)) / length(last5) < propNAallow)  {            # if proportion of NAs does not exceed limit
   points(1, 1.225, pch=20, cex=5)                                    # plot point for trend analysis
   if (mean(last5, na.rm=T) > (mean(co, na.rm=T)+sd(co, na.rm=T)))  {
-    text(1, 1.2, col="white", "+", cex=2.6, font=2) }                # above mean +1se last 5 years
+    text(1, 1.225, col="white", "+", cex=2.6, font=2) }                # above mean +1se last 5 years
   if (mean(last5, na.rm=T) < (mean(co, na.rm=T)-sd(co, na.rm=T)))  {
-    text(1, 1.2, col="white", "-", cex=2.6, font=2) }                # below mean -1se last 5 years
+    text(1, 1.225, col="white", "-", cex=2.6, font=2) }                # below mean -1se last 5 years
 
     res <- summary(lm(last5 ~ last5tim))     # calculate linear trend last 5 years
     slope <- coef(res)[2,1] * tWindow              # slope in per year unit * 5 years (this is total rise over 5-yr run)

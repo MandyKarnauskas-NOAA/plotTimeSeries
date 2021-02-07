@@ -5,18 +5,17 @@
 #' Time series data are automatically sorted within the plot based on an ordination analysis, such that those displaying similar
 #' trends appear more closely together.
 #'
-#' @param dataset A \link{data.frame} in which the first column are numerical values representing time steps and subsequent columsn are data values at those time steps.
+#' @param dataset A \link{data.frame} in which the first column is numerical values representing time steps and subsequent columsn are data values at those time steps.
 #' @param columns an integer or integer list defining the column numbers of data to be included.  Defaults to the entire data set.
 #' @param mintime a value representing the earliest time step to be included in the analysis.  Defaults to first time step in data set.
 #' @param maxtime a value representing the last time step to be included in the analysis.  Defaults to last time step in data set.
-#' @param noNAs a value between 0 and 1 representing the proportion of allowable NAs.  NA values are imputed with the mean across the time series.
-#' @param splits number of color breaks for the plot.  Options are either 4 (quartiles with red and green) or 5 (quintiles with red, yellow, green).
+#' @param noNAs a value between 0 and 1 representing the proportion of allowable NAs for any given time series.  NA values are imputed with the mean across the time series for the ordination.
+#' @param splits number of color breaks for the plot.  Options are 4 (quartiles with red and green) or 5 (quintiles with red, yellow, green).
 #' @param cexlabs a value indicating scaling for the size of the labels.
-#' @param colax a vector indicating colors for labels.  Defaults to black.
-#' @param graycol a boolean indicating whether or not grayscale colors should be used.  Defaults to FALSE
-#' @param PC an integer indicating which ordination axis the time series data should be sorted by on the plot.  Either 1 (for first axis) or 2 (for second axis).
+#' @param graycol a boolean indicating whether or not grayscale colors should be used.  Defaults to FALSE.
 #' @param method the ordination method for sorting the time series data.  Defaults to principal components analysis ("pca").  Other options
 #' are non-metric multidimensional scaling ("nmds").
+#' #' @param PC an integer indicating which ordination axis the time series data should be sorted by on the plot.  Specify either 1 (for first axis) or 2 (for second axis).
 #'
 #' @note
 #' Data must be sorted chronologically with regular time steps.
@@ -32,10 +31,12 @@
 #' ## make traffic plot of Gulf of Mexico fishery landings
 #'  trafficLightPlot(GOMlandings)
 #'
+#'  trafficLightPlot(GOMlandings, mintime = 1980, maxtime = 2000, splits = 4, method = "nmds")
+#'
 #'  @export
 trafficLightPlot <- function(dataset, columns = NA, mintime = NA, maxtime = NA,
-                    noNAs = 0, splits = 5, cexlabs = 0.9, PC = 1,
-                    graycol = FALSE, colax = 1, method = "pca")   {
+                    noNAs = 0, splits = 5, cexlabs = 0.9,
+                    graycol = FALSE, method = "pca", PC = 1)   {
 
 # dependencies ------------------------------------------
   if ("vegan" %in% installed.packages() == FALSE) { install.packages("vegan") }
@@ -63,13 +64,10 @@ trafficLightPlot <- function(dataset, columns = NA, mintime = NA, maxtime = NA,
 
 # ordination analysis and sorting of time series
   if (method=="pca")  {  pc <- prcomp(mat, scale=T)                          #  carry out PCA                                                              # transpose for sorting
-    if (PC == 1)  {  m2 <- mdat[order(pc$rot[,1]), ]  }                      # order species by their loadings on the 1st PC
-    if (PC == 2)  {  m2 <- mdat[order(pc$rot[,2]), ]  } }                    # order species by their loadings on the 2nd PC
+                         m2 <- mdat[order(pc$rot[, PC]), ]  }                # order species by their loadings on the 1st or 2nd PC
 
   if (method=="nmds")  {  pc <- metaMDS(mat, distance = "bray", k=2)         #  carry out NMDS
-    if (PC == 1)  {  m2 <- mdat[order(pc$species[,1]), ]  }
-    if (PC == 2)  {  m2 <- mdat[order(pc$species[,2]), ]  } }
-
+                          m2 <- mdat[order(pc$species[, PC]), ]  }
     m2 <- t(m2)                                                                       # transpose back
     m2 <- scale(m2)                                                                   # scale matrix
 
@@ -91,12 +89,11 @@ trafficLightPlot <- function(dataset, columns = NA, mintime = NA, maxtime = NA,
 # plot traffic plot and axes ---------------------------------
   image(yrs, (1:ncol(m2)), m4, col=cols, axes=F, xlab="", ylab="", las=2, useRaster=T)
 
-  axis(1, lab = yrs, at = yrs, las = 1, tcl=0.25)
+  axis(1, lwd = 1)
+  axis(1, at = yrs, lab = rep("", length(yrs)), las = 1, tck = -0.008, col = 1)
   axis(2, at = 1:ncol(m2), lab = sub(".", " ", sub(".", " ", colnames(m2), fixed = TRUE), fixed = TRUE),
-       cex.axis=cexlabs, las = 1, col.axis=colax, tcl=0)
-
+       cex.axis=cexlabs, las = 1, tcl=0)
   box()
-
 return(m2)
 
 }

@@ -12,14 +12,13 @@ trafficLightPlot(
   noNAs = 0,
   splits = 5,
   cexlabs = 0.9,
-  PC = 1,
-  graycol = TRUE,
-  colax = 1,
-  method = "pca"
+  graycol = FALSE,
+  method = "pca",
+  PC = 1
 )
 }
 \arguments{
-\item{dataset}{A \link{data.frame} in which the first column are numerical values representing time steps and subsequent columsn are data values at those time steps.}
+\item{dataset}{A \link{data.frame} in which the first column is numerical values representing time steps and subsequent columsn are data values at those time steps.}
 
 \item{columns}{an integer or integer list defining the column numbers of data to be included.  Defaults to the entire data set.}
 
@@ -27,20 +26,17 @@ trafficLightPlot(
 
 \item{maxtime}{a value representing the last time step to be included in the analysis.  Defaults to last time step in data set.}
 
-\item{noNAs}{a value between 0 and 1 representing the proportion of allowable NAs.  NA values are imputed with the mean across the time series.}
+\item{noNAs}{a value between 0 and 1 representing the proportion of allowable NAs for any given time series.  NA values are imputed with the mean across the time series for the ordination.}
 
-\item{splits}{number of color breaks for the plot.  Options are either 4 (quartiles with red and green) or 5 (quintiles with red, yellow, green).}
+\item{splits}{number of color breaks for the plot.  Options are 4 (quartiles with red and green) or 5 (quintiles with red, yellow, green).}
 
 \item{cexlabs}{a value indicating scaling for the size of the labels.}
 
-\item{PC}{an integer indicating which ordination axis the time series data should be sorted by on the plot.  Either 1 (for first axis) or 2 (for second axis).}
-
-\item{graycol}{a boolean indicating whether or not grayscale colors should be used.  Defaults to FALSE}
-
-\item{colax}{a vector indicating colors for labels.  Defaults to black.}
+\item{graycol}{a boolean indicating whether or not grayscale colors should be used.  Defaults to FALSE.}
 
 \item{method}{the ordination method for sorting the time series data.  Defaults to principal components analysis ("pca").  Other options
-are non-metric multidimensional scaling ("nmds").}
+are non-metric multidimensional scaling ("nmds").
+#' @param PC an integer indicating which ordination axis the time series data should be sorted by on the plot.  Specify either 1 (for first axis) or 2 (for second axis).}
 }
 \description{
 This function produces a traffic light plot for visualizing trends in multiple time series.
@@ -58,6 +54,8 @@ Data must be sorted chronologically with regular time steps.
 \examples{
 ## make traffic plot of Gulf of Mexico fishery landings
  trafficLightPlot(GOMlandings)
+
+ trafficLightPlot(GOMlandings, mintime = 1980, maxtime = 2000, splits = 4, method = "nmds")
 
  @export
 }

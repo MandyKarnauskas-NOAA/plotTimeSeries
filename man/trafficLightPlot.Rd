@@ -12,6 +12,7 @@ trafficLightPlot(
   noNAs = 0,
   splits = 5,
   cexlabs = 0.9,
+  indatformat = "\%Y",
   graycol = FALSE,
   method = "pca",
   PC = 1
@@ -26,17 +27,22 @@ trafficLightPlot(
 
 \item{maxtime}{a value representing the last time step to be included in the analysis.  Defaults to last time step in data set.}
 
-\item{noNAs}{a value between 0 and 1 representing the proportion of allowable NAs for any given time series.  NA values are imputed with the mean across the time series for the ordination.}
+\item{noNAs}{a value between 0 and 1 representing the proportion of allowable NAs for any given time series.
+NA values are imputed with the mean across the time series for the ordination.  Time series exceeding the proportion of NAs
+specified are removed from the analysis.}
 
 \item{splits}{number of color breaks for the plot.  Options are 4 (quartiles with red and green) or 5 (quintiles with red, yellow, green).}
 
 \item{cexlabs}{a value indicating scaling for the size of the labels.}
 
+\item{indatformat}{a format in which the time steps are input, as defined in \link{strptime}.  Defaults to year with century ("\%Y").}
+
 \item{graycol}{a boolean indicating whether or not grayscale colors should be used.  Defaults to FALSE.}
 
-\item{method}{the ordination method for sorting the time series data.  Defaults to principal components analysis ("pca").  Other options
-are non-metric multidimensional scaling ("nmds").
-#' @param PC an integer indicating which ordination axis the time series data should be sorted by on the plot.  Specify either 1 (for first axis) or 2 (for second axis).}
+\item{method}{the ordination method for sorting the time series data. Defaults to principal components analysis ("pca") using \link{prcomp}.  Other option
+is non-metric multidimensional scaling ("nmds") using \link{metaMDS}.}
+
+\item{PC}{an integer indicating which ordination axis the time series data should be sorted by on the plot.  Specify either 1 (for first axis) or 2 (for second axis).}
 }
 \description{
 This function produces a traffic light plot for visualizing trends in multiple time series.
@@ -45,19 +51,20 @@ Time series data are automatically sorted within the plot based on an ordination
 trends appear more closely together.
 }
 \note{
-Data must be sorted chronologically with regular time steps.
+Data must be input in a data frame where rows represent time steps and columns represent data series.
 \itemize{
-\item The first columns contains a string of time units in chronological order.
+\item The first columns contains a string of time units in any specified format.
 \item Columns 2+ contain data values for the respective time steps.
 }
 }
 \examples{
 ## make traffic plot of Gulf of Mexico fishery landings
+ par(mar = c(3, 10, 1, 1))
  trafficLightPlot(GOMlandings)
 
  trafficLightPlot(GOMlandings, mintime = 1980, maxtime = 2000, splits = 4, method = "nmds")
 
- @export
+
 }
 \references{
 \url{https://www.aoml.noaa.gov/ocd/ocdweb/ESR_GOMIEA/report/GoM_EcosystemStatusReport2017.pdf}

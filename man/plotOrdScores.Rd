@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotOrdScores.R
 \name{plotOrdScores}
 \alias{plotOrdScores}
-\title{Plotting indicator time series}
+\title{Pretty biplots for time series data}
 \usage{
 plotOrdScores(
   dataset,
@@ -65,7 +65,7 @@ Data must be input in a data frame where rows represent time steps and columns r
 }
 \examples{
 ## make traffic plot of Gulf of Mexico fishery landings
- 
+
  plotOrdScores(GOMlandings)
 
 }

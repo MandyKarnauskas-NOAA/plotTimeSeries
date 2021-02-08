@@ -1,7 +1,7 @@
-#' Plotting indicator time series
+#' Traffic light plots for time series data
 #'
 #' This function produces a traffic light plot for visualizing trends in multiple time series.
-#' The input file is a data frame with a series of regular time steps and data values at those time steps.
+#' The input file is a data frame with a series of time steps and data values at those time steps.
 #' Time series data are automatically sorted within the plot based on an ordination analysis, such that those displaying similar
 #' trends appear more closely together.
 #'

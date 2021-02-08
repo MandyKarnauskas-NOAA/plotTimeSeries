@@ -18,8 +18,7 @@ plotOrdScores(
   outdatformat = "\%y",
   main = "title",
   method = "pca",
-  nmdsk = 2,
-  return = "scores"
+  nmdsk = 2
 )
 }
 \arguments{
@@ -52,8 +51,6 @@ specified are removed from the analysis.}
 is non-metric multidimensional scaling ("nmds") using \link{metaMDS}.}
 
 \item{nmdsk}{an integer representing the number of dimensions to be used in \link{metaMDS}, if the NMDS method is specified.}
-
-\item{return}{}
 }
 \description{
 This function carries out ordination analysis and plots the ordination scores in two dimensions.

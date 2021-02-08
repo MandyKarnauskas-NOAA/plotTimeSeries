@@ -13,6 +13,7 @@ trafficLightPlot(
   splits = 5,
   cexlabs = 0.9,
   indatformat = "\%Y",
+  outdatformat = "\%Y",
   graycol = FALSE,
   method = "pca",
   PC = 1
@@ -36,6 +37,8 @@ specified are removed from the analysis.}
 \item{cexlabs}{a value indicating scaling for the size of the labels.}
 
 \item{indatformat}{a format in which the time steps are input, as defined in \link{strptime}.  Defaults to year with century ("\%Y").}
+
+\item{outdatformat}{a format as defined in \link{strptime} which represents the desired format for labeling the plot.  Defaults to year with century ("\%Y").}
 
 \item{graycol}{a boolean indicating whether or not grayscale colors should be used.  Defaults to FALSE.}
 

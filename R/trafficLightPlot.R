@@ -15,6 +15,7 @@
 #' @param splits number of color breaks for the plot.  Options are 4 (quartiles with red and green) or 5 (quintiles with red, yellow, green).
 #' @param cexlabs a value indicating scaling for the size of the labels.
 #' @param indatformat a format in which the time steps are input, as defined in \link{strptime}.  Defaults to year with century ("%Y").
+#' @param outdatformat a format as defined in \link{strptime} which represents the desired format for labeling the plot.  Defaults to year with century ("%Y").
 #' @param graycol a boolean indicating whether or not grayscale colors should be used.  Defaults to FALSE.
 #' @param method the ordination method for sorting the time series data. Defaults to principal components analysis ("pca") using \link{prcomp}.  Other option
 #' is non-metric multidimensional scaling ("nmds") using \link{metaMDS}.
@@ -39,7 +40,7 @@
 #'
 #'
 trafficLightPlot <- function(dataset, columns = NA, mintime = NA, maxtime = NA,
-                    noNAs = 0, splits = 5, cexlabs = 0.9, indatformat = "%Y",
+                    noNAs = 0, splits = 5, cexlabs = 0.9, indatformat = "%Y", outdatformat = "%Y",
                     graycol = FALSE, method = "pca", PC = 1)   {
 
 # dependencies ------------------------------------------
@@ -47,7 +48,7 @@ trafficLightPlot <- function(dataset, columns = NA, mintime = NA, maxtime = NA,
   library(vegan)
 
 # define default settings -------------------------------
-  times <- as.Date(as.character(dataset[, 1]), indatformat)
+  times <- strptime(as.character(dataset[, 1]), indatformat)
   if (is.na(mintime))  {  timmin <- min(times) } else { timmin <- as.Date(as.character(mintime), indatformat) }
   if (is.na(maxtime))  {  timmax <- max(times) } else { timmin <- as.Date(as.character(mintime), indatformat) }
   if (length(columns) == 1)  { columns <- 2:ncol(dataset) }
@@ -94,14 +95,13 @@ trafficLightPlot <- function(dataset, columns = NA, mintime = NA, maxtime = NA,
   m4 <- matrix(m3, ncol=ncol(m2))
 
 # plot traffic plot and axes ---------------------------------
-  image(times2, (1:ncol(m2)), m4, col=cols, axes=F, xlab="", ylab="", las=2, useRaster=T)
+  image(1:length(times2), (1:ncol(m2)), m4, col=cols, axes=F, xlab="", ylab="", las=2, useRaster=T)
 
-  axis(1, lwd = 1)
-  axis(1, at = times2, lab = rep("", length(times2)), las = 1, tck = -0.008, col = 1)
+  axis(1, lwd = 1, at = 1:length(times2), lab = format(times2, outdatformat))
+  #axis(1, at = 1:length(times2), lab = rep("", length(times2)), las = 1, tck = -0.008, col = 1)
   axis(2, at = 1:ncol(m2), lab = sub(".", " ", sub(".", " ", colnames(m2), fixed = TRUE), fixed = TRUE),
        cex.axis=cexlabs, las = 1, tcl=0)
   box()
 return(m2)
 
 }
-

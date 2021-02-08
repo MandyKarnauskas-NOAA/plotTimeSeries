@@ -20,7 +20,6 @@
 #' @param method the ordination method to be used in the analysis.  Defaults to principal components analysis ("pca") using \link{prcomp}.  Other option 
 #' is non-metric multidimensional scaling ("nmds") using \link{metaMDS}.
 #' @param nmdsk an integer representing the number of dimensions to be used in \link{metaMDS}, if the NMDS method is specified.  
-#' @param return
 #'
 #' @note
 #' Data must be input in a data frame where rows represent time steps and columns represent data series.   
@@ -40,7 +39,7 @@
 plotOrdScores <- function(dataset, columns = NA, mintime = NA, maxtime = NA, noNAs = 0, 
                           color = "rainbow", lab.cols = 1, tim.cex = 1, add.pts = FALSE, 
                           indatformat = "%Y", outdatformat = "%y", main = "title",  
-                          method="pca", nmdsk = 2, return = "scores")  {     
+                          method="pca", nmdsk = 2)  {     
 
 # dependencies ------------------------------------------
   if ("vegan" %in% installed.packages() == FALSE) { install.packages("vegan") }
@@ -93,7 +92,7 @@ plotOrdScores <- function(dataset, columns = NA, mintime = NA, maxtime = NA, noN
   if(method=="nmds")  {
     plot(x, y, type="n", xlab = paste0(alab, "1"),   
                          ylab = paste0(alab, "2"), 
-                         col=2, main = main, font.main = 1, axes = F)
+                         col=2, main = main, font.main = 1)
                          box()  }
   if(method=="pca")  {  
     plot(x, y, type="n", xlab = paste0(alab, " 1 (", round(tab[2, 1], 3)*100, "%)"),  
@@ -115,7 +114,6 @@ plotOrdScores <- function(dataset, columns = NA, mintime = NA, maxtime = NA, noN
   text(x, y, format(times2, "%y"), cex = tim.cex, col = lab.cols)          # overlay year labels
   box()
 
-# return either scores only or entire ordination output ----------------------------  
-  if (return == "scores")  { return(cbind(x,y)) }                                     #  return yearly scores on first two axes
-  if (return == "all")     { return(pc)         }
+# return ordination output ----------------------------                                      #  return yearly scores on first two axes
+  return(pc)         
 }                                                                               

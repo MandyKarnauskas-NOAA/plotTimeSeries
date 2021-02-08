@@ -101,6 +101,8 @@ if (monthly==TRUE) {                                                        # if
   wid <- wid * widadj     #  set adjusted width if specified
 
 # set graphics specifications based on number of panels ------------------
+  if (length(coltoplot) < (plotrownum * plotcolnum)) { plotrownum <- length(coltoplot) }
+
   if (plotcolnum + plotrownum > 2)  { plotcolnum2 <- plotcolnum*0.65; plotrownum2 <- plotrownum*0.65 }  else
                                     { plotcolnum2 <- plotcolnum; plotrownum2 <- plotrownum }
 

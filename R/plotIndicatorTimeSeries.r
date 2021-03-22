@@ -246,8 +246,8 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
     abline(h = mean(co, na.rm=T) - sd(co, na.rm=T), lty=1)
 
     # add axes and tick marks ------------------------
-    if (length(tim) > 10)  { axis(1, at=seq(1900, 2050, 5), ...) } else {
-                             axis(1, at=seq(1900, 2050, 2), ...) }           # add axis 1
+    if (length(tim_all) > 10)  { axis(1, at=seq(1900, 2050, 5), ...) } else {
+                                 axis(1, at=seq(1900, 2050, 2), ...) }           # add axis 1
   axis(1, at=seq(1900, 2050, 1), tck=-0.015, lab=rep("", 151), ...)                                                                  # add axis 1 small ticks
   axis(2, las=2, ...); box()                                                                                                         # add axis 2
 # end data plot -------------------------------------------------------------

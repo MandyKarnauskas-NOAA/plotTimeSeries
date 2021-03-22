@@ -22,7 +22,8 @@ plotIndicatorTimeSeries(
   anom = "none",
   dateformat = "\%b\%Y",
   outname = NA,
-  outtype = ""
+  outtype = "",
+  ...
 )
 }
 \arguments{
@@ -62,6 +63,8 @@ plotIndicatorTimeSeries(
 \item{outname}{a character string specifying alternate output filename; defaults to using indicator label.}
 
 \item{outtype}{a character string specifying format for output, if manual saving is not desired.  Options are "png" or "pdf".}
+
+\item{...}{Arguments to be passed to methods such as specifications for \link{plot} or \link{axis}, particularly cex.axis, cex.main, and cex.lab for sizing labels}
 }
 \description{
 This function is for standardized plotitng of indicator time series, such as those found in NOAA's Ecosystem Status Reports.

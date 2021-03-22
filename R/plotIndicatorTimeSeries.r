@@ -23,6 +23,7 @@
 #' @param dateformat a format as defined in \link{strptime} which is used for monthly time steps only.  Can be full date or month/year combination only.
 #' @param outname a character string specifying alternate output filename; defaults to using indicator label.
 #' @param outtype a character string specifying format for output, if manual saving is not desired.  Options are "png" or "pdf".
+#' @param ... Arguments to be passed to methods such as specifications for \link{plot} or \link{axis}, particularly cex.axis, cex.main, and cex.lab for sizing labels
 #'
 #' @note
 #' Data can be input directly as a .csv file in the format below, or as an object of class 'indicatordata' which contains two data frames.
@@ -57,7 +58,7 @@
 plotIndicatorTimeSeries <-  function(filename, coltoplot=2, plotrownum = 1, plotcolnum = 1,
                                      sublabel=F, sameYscale=F, yposadj=1, widadj=1, hgtadj=1, type="default",
                                      trendAnalysis=T, tWindow = 5, propNAallow= 0.60, redgreen=T, anom="none",
-                                     dateformat="%b%Y", outname=NA, outtype="")  {
+                                     dateformat="%b%Y", outname=NA, outtype="", ...)  {
 
 # read in file --------------------------------------------------------
 
@@ -184,8 +185,8 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
   par(mgp=c(3*yposadj,1,0))
 
   # blank plot with specified y limits
-  if (sameYscale==T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin, ymax))    }
-  if (sameYscale==F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm)                        }
+  if (sameYscale==T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin, ymax), ...)    }
+  if (sameYscale==F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ...)                        }
 
   if (length(tim) >= 5 & redgreen==T) {
 
@@ -245,10 +246,10 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
     abline(h = mean(co, na.rm=T) - sd(co, na.rm=T), lty=1)
 
     # add axes and tick marks ------------------------
-    if (length(tim) > 10)  { axis(1, at=seq(1900, 2050, 5)) } else {
-                             axis(1, at=seq(1900, 2050, 2)) }           # add axis 1
-  axis(1, at=seq(1900, 2050, 1), tck=-0.015, lab=rep("", 151))                                                                  # add axis 1 small ticks
-  axis(2, las=2); box()                                                                                                         # add axis 2
+    if (length(tim) > 10)  { axis(1, at=seq(1900, 2050, 5), ...) } else {
+                             axis(1, at=seq(1900, 2050, 2), ...) }           # add axis 1
+  axis(1, at=seq(1900, 2050, 1), tck=-0.015, lab=rep("", 151), ...)                                                                  # add axis 1 small ticks
+  axis(2, las=2, ...); box()                                                                                                         # add axis 2
 # end data plot -------------------------------------------------------------
 
 # start trend plot ----------------------------------------------------------
@@ -293,8 +294,8 @@ if (length(tim) <= 5) {
   par(mgp=c(3*yposadj,1,0))
 
   # plot time series - blank plot to fill in -------------------------------------
-  if (sameYscale==T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin, ymax))    }
-  if (sameYscale==F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm)                          }
+  if (sameYscale==T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin, ymax), ...)    }
+  if (sameYscale==F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ...)                          }
 
   # make red and green polygons --------------------------------------------------
   if (redgreen==T) {
@@ -340,9 +341,9 @@ if (length(tim) <= 5) {
   abline(h=mean(co, na.rm=T)+sd(co, na.rm=T), lty=1)
   abline(h=mean(co, na.rm=T)-sd(co, na.rm=T), lty=1)
 
-  axis(1, at=tim)
-  axis(1, at=seq(1900, 2050, 1), tck=-0.015, lab=rep("", 151))                                                 # add axes
-  axis(2, las=2); box()
+  axis(1, at=tim, ...)
+  axis(1, at=seq(1900, 2050, 1), tck=-0.015, lab=rep("", 151), ...)                                                 # add axes
+  axis(2, las=2, ...); box()
 
 # reset plotting params if additional panels to be plotted and trend analysis set to TRUE
   if (length(coltoplot) > 1 & trendAnalysis==T)  {

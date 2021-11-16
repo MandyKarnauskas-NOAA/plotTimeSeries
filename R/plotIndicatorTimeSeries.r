@@ -60,6 +60,11 @@ plotIndicatorTimeSeries <-  function(filename, coltoplot=2, plotrownum = 1, plot
                                      trendAnalysis=T, tWindow = 5, propNAallow= 0.60, redgreen=T, anom="none",
                                      dateformat="%b%Y", outname=NA, outtype="", ...)  {
 
+# dependencies ------------------------------------------
+
+  if ("fields" %in% installed.packages() == FALSE) { install.packages("fields") }
+  library(fields)
+
 # read in file --------------------------------------------------------
 
 if (class(filename) != "indicatordata")  {                       # if old formula, convert to class indicatordata
@@ -246,8 +251,8 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
     abline(h = mean(co, na.rm=T) - sd(co, na.rm=T), lty=1)
 
     # add axes and tick marks ------------------------
-    if (length(tim_all) > 10)  { axis(1, at=seq(1900, 2050, 5), ...) } else {
-                                 axis(1, at=seq(1900, 2050, 2), ...) }           # add axis 1
+    if ((max(tim_all) - min(tim_all)) > 10)  { axis(1, at=seq(1900, 2050, 5), ...) } else {
+                                               axis(1, at=seq(1900, 2050, 2), ...) }           # add axis 1
   axis(1, at=seq(1900, 2050, 1), tck=-0.015, lab=rep("", 151), ...)                                                                  # add axis 1 small ticks
   axis(2, las=2, ...); box()                                                                                                         # add axis 2
 # end data plot -------------------------------------------------------------
@@ -259,15 +264,17 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
   last5 <-     co_all[which(tim_all > max(tim_all)-tWindow)]
   last5tim <- tim_all[which(tim_all > max(tim_all)-tWindow)]
 
-  plot(1, xlim=c(0.94,1.06), ylim=c(0.6, 1.6), col=0, axes=F, xlab="", ylab="")  # create empty plot
+  plot(1, xlim=c(0.5,1.5), ylim=c(0.5, 1.9), col=0, axes=F, xlab="", ylab="")  # create empty plot
 
   # analyze mean and slope of last 5 years ----------------------------------------------
+  ptsiz <- 0.15 / hgtadj
+  if (outtype == "") { ptsiz <- ptsiz / 2}
   if (sum(is.na(last5)) / length(last5) < propNAallow)  {            # if proportion of NAs does not exceed limit
-  points(1, 1.225, pch=20, cex=5)                                    # plot point for trend analysis
+  add.image(1, 1.2 + 0.2/hgtadj, pt, col = grey(0:1), image.width = ptsiz, image.height = ptsiz)    # plot point for trend analysis
   if (mean(last5, na.rm=T) > (mean(co, na.rm=T)+sd(co, na.rm=T)))  {
-    text(1, 1.225, col="white", "+", cex=2.6, font=2) }                # above mean +1se last 5 years
+    add.image(1, 1.2 + 0.2/hgtadj, ptPlus, col = grey(0:1), image.width = ptsiz, image.height = ptsiz)        }      # above mean +1se last 5 years
   if (mean(last5, na.rm=T) < (mean(co, na.rm=T)-sd(co, na.rm=T)))  {
-    text(1, 1.225, col="white", "-", cex=2.6, font=2) }                # below mean -1se last 5 years
+    add.image(1, 1.2 + 0.2/hgtadj, ptMinus, col = grey(0:1), image.width = ptsiz, image.height = ptsiz)       }      # below mean -1se last 5 years
 
     res <- summary(lm(last5 ~ last5tim))     # calculate linear trend last 5 years
     slope <- coef(res)[2,1] * tWindow              # slope in per year unit * 5 years (this is total rise over 5-yr run)
@@ -276,11 +283,11 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
     # Note!!  The specific comparison coded here references the linear regression rate of change
     # calculated over the specified window in years, versus the standard deviation of entire time series.
       if (slope >  slopelim)  {
-        arrows(0.98, 0.89, x1 = 1.02, y1 = 1.01, length = 0.08, angle = 45, code = 2, lwd = 3)  }   # add up arrow for positive trend
+        add.image(1, 1.2 - 0.2/hgtadj, arrowUp, col = grey(0:1), image.width = ptsiz, image.height = ptsiz)      }   # add up arrow for positive trend
       if (slope <  -slopelim) {
-        arrows(0.98, 1.01, x1 = 1.02, y1 = 0.89, length = 0.08, angle = 45, code = 2, lwd = 3) }    # add down arrow for negative trend
+        add.image(1, 1.2 - 0.2/hgtadj, arrowDown, col = grey(0:1), image.width = ptsiz, image.height = ptsiz)    }    # add down arrow for negative trend
       if (slope <= slopelim & slope >= -slopelim) {
-        arrows(0.97, 0.95, x1 = 1.03, y1 = 0.95, length = 0.08, angle = 45, code = 3, lwd = 3) }    # double arrow if no trend
+        add.image(1, 1.2 - 0.2/hgtadj, arrowSide, col = grey(0:1), image.width = ptsiz, image.height = ptsiz)    }    # double arrow if no trend
                                                   }                  # end analysis of mean and slope
                     }                                                # end trend plot
   }                                                                  # end looping through indicator columns

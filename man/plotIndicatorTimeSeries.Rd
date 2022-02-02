@@ -5,8 +5,8 @@
 \title{Plotting indicator time series}
 \usage{
 plotIndicatorTimeSeries(
-  filename,
-  coltoplot = 2,
+  indobject,
+  coltoplot = 1,
   plotrownum = 1,
   plotcolnum = 1,
   sublabel = F,
@@ -15,6 +15,7 @@ plotIndicatorTimeSeries(
   widadj = 1,
   hgtadj = 1,
   type = "default",
+  CItype = "band",
   trendAnalysis = T,
   tWindow = 5,
   propNAallow = 0.6,
@@ -27,9 +28,9 @@ plotIndicatorTimeSeries(
 )
 }
 \arguments{
-\item{filename}{an object of class 'indicatordata' or a .csv file in standardized format.  See details below.}
+\item{indobject}{an object of class 'indicatordata'. See details below. For deprecated .csv format, see \link{conv2indicatordata}.}
 
-\item{coltoplot}{an integer or integer list defining the column numbers of indicator file to plot.  Defaults to a single column of data in column 2.}
+\item{coltoplot}{an integer or integer list defining the column numbers of indicator file to plot.  Defaults to a single column of data in column 1.}
 
 \item{plotrownum}{an integer defining the number of rows of plots in a multi-panel plot.}
 
@@ -39,14 +40,17 @@ plotIndicatorTimeSeries(
 
 \item{sameYscale}{a logical value indicating whether a consistent y-axis scale is desired across multiple panels.}
 
-\item{yposadj}{a number specifying manual adjustment of position of y-axis label; values >1 move text further from the axis.}
+\item{yposadj}{a number specifying manual adjustment of position of y-axis label; values > 1 move text further from the axis.}
 
 \item{widadj}{expansion factor to adjust the total width of plot.}
 
 \item{hgtadj}{expansion factor to adjust the total height of plot.}
 
 \item{type}{a character string indicating which type of plot is desired. Defaults to points, with lines for consecutive time steps only.
-"ptsOnly" and "allLines" can be specified.}
+"ptsOnly" and "allLines" can be specified for only points or only lines, respectively.}
+
+\item{CItype}{is a character string indictating which type of confidence intervals are desired.
+Defaults to shaded bands filling in the area between the upper and lower intervals, or use "pts" for an interval plot.}
 
 \item{trendAnalysis}{a logical value indicating whether to highlight the trend in mean and slope over last 5 years; defaults to TRUE unless fewer than 5 years of data.}
 
@@ -60,11 +64,11 @@ plotIndicatorTimeSeries(
 
 \item{dateformat}{a format as defined in \link{strptime} which is used for monthly time steps only.  Can be full date or month/year combination only.}
 
-\item{outname}{a character string specifying alternate output filename; defaults to using indicator label.}
+\item{outname}{a character string specifying alternate output filename; defaults to using the object name.}
 
 \item{outtype}{a character string specifying format for output, if manual saving is not desired.  Options are "png" or "pdf".}
 
-\item{...}{Arguments to be passed to methods such as specifications for \link{plot} or \link{axis}, particularly cex.axis, cex.main, and cex.lab for sizing labels}
+\item{...}{Arguments to be passed to methods such as specifications for \link{plot} or \link{axis}, particularly cex.axis, cex.main, and cex.lab for sizing labels.}
 }
 \description{
 This function is for standardized plotitng of indicator time series, such as those found in NOAA's Ecosystem Status Reports.
@@ -72,32 +76,33 @@ The function imports a data frame of indicator values and dates and plots the ti
 An optional trend analysis highlights changes in the mean and slope of the time series in the last 5 years of data (or other specified window).
 }
 \note{
-Data can be input directly as a .csv file in the format below, or as an object of class 'indicatordata' which contains two data frames.
+A deprecated version of this code allowed for .csv format to be input.  These can now be converted using \link{conv2indicatordata}.
+
+Data must be input as a list object of class 'indicatordata' which contains at least three attributes: \strong{labels}, \strong{indicators}, and \strong{datelist}.
 \itemize{
-\item The first \link{data.frame} contains 3 rows with the indicator name, unit, and sublabel.  Number of columns is equal to the number of indicators.
-\item The second \link{data.frame} contains the data; the first column contains the dates and columns 2+ contain the indicator values.
-}
-A .csv file should be formatted as follows:
-\itemize{
-\item \strong{Row 1} contains a character string of the indicator name (main title of plot).
-\item \strong{Row 2} contains a character string of the indicator units (y-axis label).
-\item \strong{Row 3} contains an optional character string with information on the sublabel (when multiple panels are used).
-\item \strong{Column 1} is time values, \strong{columns 2} and on are indicator data.  The first three values of column 1 are NA.
+\item \strong{labels} is a \link{data.frame} containing up to 3 rows and the number of columns equal to the number of indicators.
+\emph{Row 1} specifies the indicator name, \emph{row 2} specifies the measurement unit, and \emph{row 3} specifies a sublabel.
+\item \strong{indicators} is a \link{data.frame} containing the indicator data, with each column containing values for a given indicator and time step.
+\item \strong{datelist} is a \link{vector} containing the time steps at which the indicators were measured, in chronological order.
+The length of \strong{datelist} must be equal to the number of rows in \strong{indicators}.
 \item Time can be in year (with century), or monthly time step in a variety of formats (e.g, Jan1986, Jan-86, 1986jan), including or excluding day of month.
+\item Optional attributes: \strong{ulim} and \strong{llim} are represent, respectively, the upper and lower confidence intervals.
+They must be in the format of a \link{data.frame}, with equal dimensions to \strong{indicators}.  The first column of \strong{ulim} corresponds to the first column of \strong{indicators}, and so on.
 }
 }
 \examples{
 ## plot a single indicator
+ head(menhaden)
  plotIndicatorTimeSeries(menhaden)
 
- ## plot an indicator, compare with plot of standardized anomalies
- plotIndicatorTimeSeries(NPP)
- plotIndicatorTimeSeries(NPP, anom="stmon")
-
  ## plot a four-panel plot of indicator values reported at different locations
- plotIndicatorTimeSeries(bottomDO, outtype="png", coltoplot = c(2:5),
- plotcolnum = 2, plotrownum = 2, sublabel=T, sameYscale=T)
- @export
+ plotIndicatorTimeSeries(bottomDO, coltoplot = 1:4, sublabel = T, sameYscale = T)
+
+ ## plot an indicator, compare with plot of standardized anomalies
+ par(mfrow = c(2, 1))
+ plotIndicatorTimeSeries(NPP)
+ plotIndicatorTimeSeries(NPP, anom = "stmon")
+
 }
 \references{
 \url{https://www.aoml.noaa.gov/ocd/ocdweb/ESR_GOMIEA/report/GoM_EcosystemStatusReport2017.pdf}

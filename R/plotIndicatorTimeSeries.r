@@ -4,40 +4,42 @@
 #' The function imports a data frame of indicator values and dates and plots the time series, denoting mean and values above and below one standard deviation from the mean.
 #' An optional trend analysis highlights changes in the mean and slope of the time series in the last 5 years of data (or other specified window).
 #'
-#' @param filename an object of class 'indicatordata' or a .csv file in standardized format.  See details below.
-#' @param coltoplot an integer or integer list defining the column numbers of indicator file to plot.  Defaults to a single column of data in column 2.
+#' @param indobject an object of class 'indicatordata'. See details below. For deprecated .csv format, see \link{conv2indicatordata}.
+#' @param coltoplot an integer or integer list defining the column numbers of indicator file to plot.  Defaults to a single column of data in column 1.
 #' @param plotrownum an integer defining the number of rows of plots in a multi-panel plot.
 #' @param plotcolnum an integer defining the number of columns of plots in multi-panel plot.
 #' @param sublabel a logical value indicating whether optional descriptive information should appear within main label.
 #' @param sameYscale a logical value indicating whether a consistent y-axis scale is desired across multiple panels.
-#' @param yposadj a number specifying manual adjustment of position of y-axis label; values >1 move text further from the axis.
+#' @param yposadj a number specifying manual adjustment of position of y-axis label; values > 1 move text further from the axis.
 #' @param widadj expansion factor to adjust the total width of plot.
 #' @param hgtadj expansion factor to adjust the total height of plot.
 #' @param type a character string indicating which type of plot is desired. Defaults to points, with lines for consecutive time steps only.
-#'         "ptsOnly" and "allLines" can be specified.
+#'         "ptsOnly" and "allLines" can be specified for only points or only lines, respectively.
+#' @param CItype is a character string indictating which type of confidence intervals are desired.
+#'          Defaults to shaded bands filling in the area between the upper and lower intervals, or use "pts" for an interval plot.
 #' @param trendAnalysis a logical value indicating whether to highlight the trend in mean and slope over last 5 years; defaults to TRUE unless fewer than 5 years of data.
 #' @param tWindow an integer defining the number of years over which the recent trend analysis should be calculated; defaults to last 5 years.
 #' @param propNAallow if fraction denoting the allowable proportion of missing values in last 5 years; when the proportion of NAs exceeds this value, trend analysis will not appear (defaults to 0.5)
 #' @param redgreen a logical value indicating whether to remove red/green shading of anomalies from plot.
 #' @param anom a character string indicating whether to convert indicator to monthly anomalies.  One of "none", "mon" (monthly anomalies) or "stmon" (standardized monthly anomalies) can be used.
 #' @param dateformat a format as defined in \link{strptime} which is used for monthly time steps only.  Can be full date or month/year combination only.
-#' @param outname a character string specifying alternate output filename; defaults to using indicator label.
+#' @param outname a character string specifying alternate output filename; defaults to using the object name.
 #' @param outtype a character string specifying format for output, if manual saving is not desired.  Options are "png" or "pdf".
-#' @param ... Arguments to be passed to methods such as specifications for \link{plot} or \link{axis}, particularly cex.axis, cex.main, and cex.lab for sizing labels
+#' @param ... Arguments to be passed to methods such as specifications for \link{plot} or \link{axis}, particularly cex.axis, cex.main, and cex.lab for sizing labels.
 #'
 #' @note
-#' Data can be input directly as a .csv file in the format below, or as an object of class 'indicatordata' which contains two data frames.
+#' A deprecated version of this code allowed for .csv format to be input.  These can now be converted using \link{conv2indicatordata}.
+#'
+#' Data must be input as a list object of class 'indicatordata' which contains at least three attributes: **labels**, **indicators**, and **datelist**.
 #' \itemize{
-#' \item The first \link{data.frame} contains 3 rows with the indicator name, unit, and sublabel.  Number of columns is equal to the number of indicators.
-#' \item The second \link{data.frame} contains the data; the first column contains the dates and columns 2+ contain the indicator values.
-#' }
-#' A .csv file should be formatted as follows:
-#' \itemize{
-#'  \item **Row 1** contains a character string of the indicator name (main title of plot).
-#'  \item **Row 2** contains a character string of the indicator units (y-axis label).
-#'  \item **Row 3** contains an optional character string with information on the sublabel (when multiple panels are used).
-#'  \item **Column 1** is time values, **columns 2** and on are indicator data.  The first three values of column 1 are NA.
+#' \item **labels** is a \link{data.frame} containing up to 3 rows and the number of columns equal to the number of indicators.
+#'        *Row 1* specifies the indicator name, *row 2* specifies the measurement unit, and *row 3* specifies a sublabel.
+#' \item **indicators** is a \link{data.frame} containing the indicator data, with each column containing values for a given indicator and time step.
+#' \item **datelist** is a \link{vector} containing the time steps at which the indicators were measured, in chronological order.
+#' The length of **datelist** must be equal to the number of rows in **indicators**.
 #'  \item Time can be in year (with century), or monthly time step in a variety of formats (e.g, Jan1986, Jan-86, 1986jan), including or excluding day of month.
+#'  \item Optional attributes: **ulim** and **llim** are represent, respectively, the upper and lower confidence intervals.
+#'  They must be in the format of a \link{data.frame}, with equal dimensions to **indicators**.  The first column of **ulim** corresponds to the first column of **indicators**, and so on.
 #'  }
 #'
 #' @references
@@ -45,20 +47,21 @@
 #'
 #' @examples
 #' ## plot a single indicator
+#'  head(menhaden)
 #'  plotIndicatorTimeSeries(menhaden)
 #'
-#'  ## plot an indicator, compare with plot of standardized anomalies
-#'  plotIndicatorTimeSeries(NPP)
-#'  plotIndicatorTimeSeries(NPP, anom="stmon")
-#'
 #'  ## plot a four-panel plot of indicator values reported at different locations
-#'  plotIndicatorTimeSeries(bottomDO, outtype="png", coltoplot = c(2:5),
-#'  plotcolnum = 2, plotrownum = 2, sublabel=T, sameYscale=T)
-#'  @export
-plotIndicatorTimeSeries <-  function(filename, coltoplot=2, plotrownum = 1, plotcolnum = 1,
-                                     sublabel=F, sameYscale=F, yposadj=1, widadj=1, hgtadj=1, type="default",
-                                     trendAnalysis=T, tWindow = 5, propNAallow= 0.60, redgreen=T, anom="none",
-                                     dateformat="%b%Y", outname=NA, outtype="", ...)  {
+#'  plotIndicatorTimeSeries(bottomDO, coltoplot = 1:4, sublabel = T, sameYscale = T)
+#'
+#'  ## plot an indicator, compare with plot of standardized anomalies
+#'  par(mfrow = c(2, 1))
+#'  plotIndicatorTimeSeries(NPP)
+#'  plotIndicatorTimeSeries(NPP, anom = "stmon")
+#'
+plotIndicatorTimeSeries <-  function(indobject, coltoplot = 1, plotrownum = 1, plotcolnum = 1,
+                                     sublabel = F, sameYscale = F, yposadj = 1, widadj = 1, hgtadj = 1, type = "default", CItype = "band",
+                                     trendAnalysis = T, tWindow = 5, propNAallow = 0.60, redgreen = T, anom = "none",
+                                     dateformat = "%b%Y", outname = NA, outtype = "", ...)  {
 
 # dependencies ------------------------------------------
 
@@ -67,32 +70,27 @@ plotIndicatorTimeSeries <-  function(filename, coltoplot=2, plotrownum = 1, plot
 
 # read in file --------------------------------------------------------
 
-if (class(filename) != "indicatordata")  {                       # if old formula, convert to class indicatordata
-indnames <- read.table(filename, header=F, sep=",", skip=0, quote="", stringsAsFactors = FALSE)[1:3,]   # load data file
-inddata <- read.table(filename, header=F, sep=",", skip=3, quote="", stringsAsFactors = FALSE)   # load data file labels
-s <- list(labels = indnames, dat = inddata)
-class(s) <- "indicatordata"
-  } else {
-    s <- filename
-    s$labels <- cbind(c(NA, NA, NA), s$labels)
-    }
+if (class(indobject) != "indicatordata")  {  print("Need to use indicatordata object")  }
 
-d1 <- s$labels            # use former naming conventions
-d <- s$dat
+indobject$labels <- data.frame(indobject$labels, stringsAsFactors = F)
+
+d1 <- indobject$labels            # use former naming conventions
+d <-  indobject$indicators
+dd <- indobject$datelist
 
 # convert dates to standardized format --------------------
 formatlis <- c(dateformat)  # list of formats
 
-if (class(d$V1[1]) == "integer" & nchar(d$V1[1]) <= 4) {              # is time column values of years?
+if (class(dd[1]) == "integer" & nchar(dd[1]) <= 4) {              # is time column values of years?
   monthly <- FALSE                                                     # if so, monthly F and set time to year
-  tim_all <- d$V1
+  tim_all <- dd
   }  else  {                                                          # else need to find and extract month format
   monthly <- TRUE
-  if (is.na(as.Date(d$V1[1], tryFormats = formatlis, optional = TRUE))) {   # if no day available, add it manually
-    d$V1 <- paste0("1-", d$V1)                                              # adding a day to date string
-    datelis <- as.Date(d$V1, tryFormats =  paste0("%d-", formatlis))                        # convert date
+  if (is.na(as.Date(dd[1], tryFormats = formatlis, optional = TRUE))) {   # if no day available, add it manually
+    dd <- paste0("1-", dd)                                              # adding a day to date string
+    datelis <- as.Date(dd, tryFormats =  paste0("%d-", formatlis))                        # convert date
       } else {
-    datelis <- as.Date(d$V1, tryFormats =  paste0("%d-", formatlis))                        # if day is available then convert date
+    datelis <- as.Date(dd, tryFormats =  paste0("%d-", formatlis))                        # if day is available then convert date
       }
   }
 
@@ -101,20 +99,22 @@ if (monthly==TRUE) {                                                        # if
 }
 
 # adjustment for width ---------------------------------------------------
-  if (monthly==F) { wid <- length(tim_all) * 1.5 }  else  { wid <- length(tim_all) / 6 }
+  if (monthly == F) { wid <- length(tim_all) * 1.5 }  else  { wid <- length(tim_all) / 6 }
   if (length(tim_all) <= 10 & length(tim_all) > 5) {  wid <- wid*2  }
   if (length(tim_all) <= 5)  {  wid <- wid*3  }
   wid <- wid * widadj     #  set adjusted width if specified
 
 # set graphics specifications based on number of panels ------------------
-  if (length(coltoplot) < (plotrownum * plotcolnum)) { plotrownum <- length(coltoplot) }
+
+  if (length(coltoplot) > (plotrownum * plotcolnum)) {  plotcolnum <- 2; plotrownum <- ceiling(length(coltoplot) / 2)  }
+  #  if (length(coltoplot) < (plotrownum * plotcolnum)) {  plotrownum <- length(coltoplot)  }
 
   if (plotcolnum + plotrownum > 2)  { plotcolnum2 <- plotcolnum*0.65; plotrownum2 <- plotrownum*0.65 }  else
                                     { plotcolnum2 <- plotcolnum; plotrownum2 <- plotrownum }
 
 # adjust name for output graphic, if specified ------------------------------
   if (is.na(outname))  {
-        filnam <- paste0(s$labels[1,2], ".", outtype)
+        filnam <- paste0(indobject, ".", outtype)
         }
 
 # adjust plot size for extra long labels ------------------------------------
@@ -142,8 +142,13 @@ if (outtype=="png")  {
 #  layout.show(nf)
 
 # get common yscale -------------------------------------------------------------
-  ymin <- min(d[,coltoplot], na.rm=T) * 0.99
-  ymax <- max(d[,coltoplot], na.rm=T) * 1.01
+  if (length(indobject$llim) > 0) {
+    ymin_st <- min(cbind(d[, coltoplot], indobject$llim[, coltoplot]), na.rm=T) * 0.99
+    ymax_st <- max(cbind(d[, coltoplot], indobject$ulim[, coltoplot]), na.rm=T) * 1.01
+  } else {
+    ymin_st <- min(d[, coltoplot], na.rm=T) * 0.99
+    ymax_st <- max(d[, coltoplot], na.rm=T) * 1.01
+  }
 
 # loop through indicator columns ----------------------------------------
   for (i in coltoplot)  {
@@ -165,7 +170,8 @@ if (outtype=="png")  {
       most  <- tapply(co_all, moref, sd, na.rm=T)
         for (m in 1:12) {
           co_all[which(moref==m)] <- (co_all[which(moref==m)] - moav[m])/most[m]   }
-                    }
+    }
+
 # create sublabel ---------------------------------------------------------
   if (sublabel==T) { mm <- paste(as.character(d1[1,i]), "\n", as.character(d1[3,i]), sep="") } else {
                      mm <- d1[1,i] }                               # create y-axis label
@@ -182,6 +188,14 @@ colind <- c("#FF000080", "#00FF0080")             # shading of anomalies +/- 1 S
   tim <- tim_all[!is.na(co_all)]        # for dealing with missing values
   co <- co_all[!is.na(co_all)]
 
+  if (length(indobject$llim) > 0) {
+    ymin <- min(c(co_all, indobject$llim[, i]), na.rm=T) * 0.99
+    ymax <- max(c(co_all, indobject$ulim[, i]), na.rm=T) * 1.01
+  } else {
+    ymin <- min(cbind(co_all), na.rm=T) * 0.99
+    ymax <- max(cbind(co_all), na.rm=T) * 1.01
+  }
+
 # start data plot -----------------------------------------------------------
 if (length(tim) > 5) {                  # plotting if more than 5 data points
 
@@ -190,8 +204,8 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
   par(mgp=c(3*yposadj,1,0))
 
   # blank plot with specified y limits
-  if (sameYscale==T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin, ymax), ...)    }
-  if (sameYscale==F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ...)                        }
+  if (sameYscale==T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin_st, ymax_st), ...)    }
+  if (sameYscale==F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin, ymax), ...)                        }
 
   if (length(tim) >= 5 & redgreen==T) {
 
@@ -222,7 +236,24 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
                   (mean(co_all, na.rm=T)+sd(co_all, na.rm=T))), col="#0000FF20", border=F)
                   }
 
-    # plot the points or the lines -----------------------------------------
+  # plot the confidence intervals --------------------------
+
+  if (length(indobject$llim) > 0) {
+  ulim_all <- indobject$ulim[, i]
+  llim_all <- indobject$llim[, i]
+  ulim <-  ulim_all[!is.na(co_all)]
+  llim <-  llim_all[!is.na(co_all)]
+
+  if (CItype == "pts")  {
+    for (m in 1:length(tim_all))  {
+      arrows(tim_all[m], ulim_all[m], x1 = tim_all[m], y1 = llim_all[m], length = 1/wid, angle = 90, code = 3, col = gray(0.4))
+    }
+  }            # plot time series - points
+  if (CItype == "band")  {
+    polygon(x = c(tim, tim[length(tim): 1]), y = c(ulim, llim[length(tim): 1]), border = NA, col = "#00000020")   }
+  }
+
+  # plot the points or the lines -----------------------------------------
   tstep <- round(mean(diff(tim_all)), 2)   # determine time step
     if (type == "ptsOnly")  {
         points(tim_all, co_all, pch=20, cex=1.5)
@@ -243,7 +274,7 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
       if (type == "allLines")  {
         lines(tim, co, lwd=2)               # plot time series - lines for all years
         points(tim_all, co_all, pch=20, cex=0.75)
-       }
+      }
 
     # add parallel lines for mean and sd ---------------------------
     abline(h = mean(co, na.rm=T), lty=8)
@@ -270,11 +301,11 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
   ptsiz <- 0.15 / hgtadj
   if (outtype == "") { ptsiz <- ptsiz / 2}
   if (sum(is.na(last5)) / length(last5) < propNAallow)  {            # if proportion of NAs does not exceed limit
-  add.image(1, 1.2 + 0.2/hgtadj, pt, col = grey(0:1), image.width = ptsiz, image.height = ptsiz)    # plot point for trend analysis
-  if (mean(last5, na.rm=T) > (mean(co, na.rm=T)+sd(co, na.rm=T)))  {
-    add.image(1, 1.2 + 0.2/hgtadj, ptPlus, col = grey(0:1), image.width = ptsiz, image.height = ptsiz)        }      # above mean +1se last 5 years
-  if (mean(last5, na.rm=T) < (mean(co, na.rm=T)-sd(co, na.rm=T)))  {
-    add.image(1, 1.2 + 0.2/hgtadj, ptMinus, col = grey(0:1), image.width = ptsiz, image.height = ptsiz)       }      # below mean -1se last 5 years
+    add.image(1, 1.2 + 0.2/hgtadj, ptSolid, col = grey(0:1), image.width = ptsiz, image.height = ptsiz)    # plot point for trend analysis
+    if (mean(last5, na.rm=T) > (mean(co, na.rm=T)+sd(co, na.rm=T)))  {
+      add.image(1, 1.2 + 0.2/hgtadj, ptPlus, col = grey(0:1), image.width = ptsiz, image.height = ptsiz)        }      # above mean +1se last 5 years
+    if (mean(last5, na.rm=T) < (mean(co, na.rm=T)-sd(co, na.rm=T)))  {
+      add.image(1, 1.2 + 0.2/hgtadj, ptMinus, col = grey(0:1), image.width = ptsiz, image.height = ptsiz)       }      # below mean -1se last 5 years
 
     res <- summary(lm(last5 ~ last5tim))     # calculate linear trend last 5 years
     slope <- coef(res)[2,1] * tWindow              # slope in per year unit * 5 years (this is total rise over 5-yr run)
@@ -282,13 +313,13 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
 
     # Note!!  The specific comparison coded here references the linear regression rate of change
     # calculated over the specified window in years, versus the standard deviation of entire time series.
-      if (slope >  slopelim)  {
-        add.image(1, 1.2 - 0.2/hgtadj, arrowUp, col = grey(0:1), image.width = ptsiz, image.height = ptsiz)      }   # add up arrow for positive trend
-      if (slope <  -slopelim) {
-        add.image(1, 1.2 - 0.2/hgtadj, arrowDown, col = grey(0:1), image.width = ptsiz, image.height = ptsiz)    }    # add down arrow for negative trend
-      if (slope <= slopelim & slope >= -slopelim) {
-        add.image(1, 1.2 - 0.2/hgtadj, arrowSide, col = grey(0:1), image.width = ptsiz, image.height = ptsiz)    }    # double arrow if no trend
-                                                  }                  # end analysis of mean and slope
+    if (slope >  slopelim)  {
+      add.image(1, 1.2 - 0.2/hgtadj, arrowUp, col = grey(0:1), image.width = ptsiz, image.height = ptsiz)      }   # add up arrow for positive trend
+    if (slope <  -slopelim) {
+      add.image(1, 1.2 - 0.2/hgtadj, arrowDown, col = grey(0:1), image.width = ptsiz, image.height = ptsiz)    }    # add down arrow for negative trend
+    if (slope <= slopelim & slope >= -slopelim) {
+      add.image(1, 1.2 - 0.2/hgtadj, arrowSide, col = grey(0:1), image.width = ptsiz, image.height = ptsiz)    }    # double arrow if no trend
+                            }                  # end analysis of mean and slope
                     }                                                # end trend plot
   }                                                                  # end looping through indicator columns
 # end trend plot for long time series -----------------------------------------
@@ -301,8 +332,8 @@ if (length(tim) <= 5) {
   par(mgp=c(3*yposadj,1,0))
 
   # plot time series - blank plot to fill in -------------------------------------
-  if (sameYscale==T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin, ymax), ...)    }
-  if (sameYscale==F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ...)                          }
+  if (sameYscale==T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin_st, ymax_st), ...)    }
+  if (sameYscale==F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin, ymax),...)                          }
 
   # make red and green polygons --------------------------------------------------
   if (redgreen==T) {
@@ -320,7 +351,24 @@ if (length(tim) <= 5) {
             mean(co_all, na.rm=T)+sd(co_all, na.rm=T),
             mean(co_all, na.rm=T)+sd(co_all, na.rm=T)), col="white", border=T)
 
-# plot the points or the lines -----------------------------------------
+  # plot the confidence intervals --------------------------
+
+  if (length(indobject$llim) > 0) {
+    ulim_all <- indobject$ulim[, i]
+    llim_all <- indobject$llim[, i]
+    ulim <-  ulim_all[!is.na(co_all)]
+    llim <-  llim_all[!is.na(co_all)]
+
+    if (CItype == "pts")  {
+      for (m in 1:length(tim_all))  {
+        arrows(tim_all[m], ulim_all[m], x1 = tim_all[m], y1 = llim_all[m], length = 0.05, angle = 90, code = 3, col = gray(0.4))
+      }
+    }            # plot time series - points
+    if (CItype == "band")  {
+      polygon(x = c(tim, tim[length(tim): 1]), y = c(ulim, llim[length(tim): 1]), border = NA, col = "#00000020")   }
+  }
+
+  # plot the points or the lines -----------------------------------------
   tstep <- round(mean(diff(tim_all)), 2)   # determine time step
   if (type == "ptsOnly")  {
     points(tim_all, co_all, pch=20, cex=1.5)

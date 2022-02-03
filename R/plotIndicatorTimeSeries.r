@@ -197,6 +197,17 @@ yl <- d1[2,i]
   if (anom=="mon")   { yl <- paste(yl, "\n", "monthly anomaly", sep="") }     # adjust label if monthly anomaly
   if (anom=="stmon") { yl <- paste(yl, "\n", "standardized monthly anomaly", sep="") }
 
+# insert subscript for m2 units --------------------------------------------
+
+expflag <- 0
+
+if (grepl("m2", yl) == TRUE)  {
+  yl1 <- str_replace_all(yl, " ", "~")
+  yl2 <- str_replace_all(yl1, "2", "^2")
+  yl <- yl2
+  expflag <- 1
+  }
+
 colind <- c("#FF000080", "#00FF0080")             # shading of anomalies +/- 1 S.D.
 
 # in case of missing values in column -------------------------------------
@@ -221,8 +232,13 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
   par(mgp=c(3*yposadj,1,0))
 
   # blank plot with specified y limits
-  if (sameYscale == T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin_st, ymax_st), ...)    }
-  if (sameYscale == F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin, ymax), ...)                        }
+  if (expflag == 1) {
+    if (sameYscale == T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = parse(text = yl), main = mm, ylim = c(ymin_st, ymax_st), ...)    }
+    if (sameYscale == F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = parse(text = yl), main = mm, ylim = c(ymin, ymax), ...)                        }
+  }  else {
+    if (sameYscale == T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin_st, ymax_st), ...)    }
+    if (sameYscale == F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin, ymax), ...)                        }
+  }
 
   if (redgreen == T) {
 
@@ -349,8 +365,13 @@ if (length(tim) <= 5) {
   par(mgp=c(3*yposadj,1,0))
 
   # plot time series - blank plot to fill in -------------------------------------
-  if (sameYscale==T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin_st, ymax_st), ...)    }
-  if (sameYscale==F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin, ymax),...)                          }
+  if (expflag == 1) {
+    if (sameYscale == T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = parse(text = yl), main = mm, ylim = c(ymin_st, ymax_st), ...)    }
+    if (sameYscale == F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = parse(text = yl), main = mm, ylim = c(ymin, ymax), ...)                        }
+  }  else {
+    if (sameYscale == T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin_st, ymax_st), ...)    }
+    if (sameYscale == F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin, ymax), ...)                        }
+  }
 
   # plot the confidence intervals --------------------------
 

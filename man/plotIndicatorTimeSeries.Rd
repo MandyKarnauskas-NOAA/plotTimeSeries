@@ -28,7 +28,7 @@ plotIndicatorTimeSeries(
 )
 }
 \arguments{
-\item{indobject}{an object of class 'indicatordata'. See details below. For deprecated .csv format, see \link{conv2indicatordata}.}
+\item{indobject}{an object of class \code{indicatordata}. See details below. For deprecated .csv format, see \link{conv2indicatordata}.}
 
 \item{coltoplot}{an integer or integer list defining the column numbers of indicator file to plot.  Defaults to a single column of data in column 1.}
 
@@ -68,7 +68,7 @@ Defaults to shaded bands filling in the area between the upper and lower interva
 
 \item{outtype}{a character string specifying format for output, if manual saving is not desired.  Options are \code{bmp}, \code{jpeg}, \code{png}, \code{tiff}, or \code{eps}.}
 
-\item{...}{Arguments to be passed to methods such as specifications for \link{plot} or \link{axis}, particularly cex.axis, cex.main, and cex.lab for sizing labels.}
+\item{...}{Arguments to be passed to methods such as specifications for \link{plot} or \link{axis}, particularly \code{cex.axis}, \code{cex.main}, and \code{cex.lab} for sizing labels.}
 }
 \description{
 This function is for standardized plotitng of indicator time series, such as those found in NOAA's Ecosystem Status Reports.
@@ -78,12 +78,15 @@ An optional trend analysis highlights changes in the mean and slope of the time 
 \note{
 A deprecated version of this code allowed for .csv format to be input.  These can now be converted using \link{conv2indicatordata}.
 
-Data must be input as a list object of class 'indicatordata' which contains at least three attributes: \code{labels}, \code{indicators}, and \code{datelist}.
+Data must be input as a list object of class \code{indicatordata} which contains at least three attributes: \code{labels}, \code{indicators}, and \code{datelist}.
 \itemize{
-\item \verb{labels`` is a \link{data.frame} containing up to 3 rows and the number of columns equal to the number of indicators. **Row 1** specifies the indicator name, **row 2** specifies the measurement unit, and **row 3** specifies a sublabel. \\item }indicators\verb{is a \link{data.frame} containing the indicator data, with each column containing values for a given indicator and time step. \\item}datelist\verb{ is a \link{vector} containing the time steps at which the indicators were measured, in chronological order. The length of `datelist} must be equal to the number of rows in \code{indicators}.
+\item \code{labels} is a \link{data.frame} containing up to 3 rows and the number of columns equal to the number of indicators.
+\strong{Row 1} specifies the indicator name, \strong{row 2} specifies the measurement unit, and \strong{row 3} specifies a sublabel.
+\item \code{indicators} is a \link{data.frame} containing the indicator data, with each column containing values for a given indicator and time step.
+\item \verb{datelist`` is a \link{vector} containing the time steps at which the indicators were measured, in chronological order. The length of }datelist`` must be equal to the number of rows in \code{indicators}.
 \item Time can be in year (with century), or monthly time step in a variety of formats (e.g, Jan1986, Jan-86, 1986jan), including or excluding day of month.
-\item Optional attributes: \code{ulim} and \code{llim} are represent, respectively, the upper and lower confidence intervals.
-They must be in the format of a \link{data.frame}, with equal dimensions to \code{indicators}.  The first column of \verb{ulim`` corresponds to the first column of }indicators`, and so on.
+\item Optional attributes: `ulim` and `llim` are represent, respectively, the upper and lower confidence intervals.
+They must be in the format of a \link{data.frame}, with equal dimensions to `indicators`.  The first column of `ulim` corresponds to the first column of `indicators`, and so on.
 }
 }
 \examples{

@@ -4,7 +4,7 @@
 #' The function imports a data frame of indicator values and dates and plots the time series, denoting mean and values above and below one standard deviation from the mean.
 #' An optional trend analysis highlights changes in the mean and slope of the time series in the last 5 years of data (or other specified window).
 #'
-#' @param indobject an object of class 'indicatordata'. See details below. For deprecated .csv format, see \link{conv2indicatordata}.
+#' @param indobject an object of class `indicatordata`. See details below. For deprecated .csv format, see \link{conv2indicatordata}.
 #' @param coltoplot an integer or integer list defining the column numbers of indicator file to plot.  Defaults to a single column of data in column 1.
 #' @param plotrownum an integer defining the number of rows of plots in a multi-panel plot.
 #' @param plotcolnum an integer defining the number of columns of plots in multi-panel plot.
@@ -25,21 +25,21 @@
 #' @param dateformat a format as defined in \link{strptime} which is used for monthly time steps only.  Can be full date or month/year combination only.
 #' @param outname a character string specifying alternate output filename; defaults to using the object name.
 #' @param outtype a character string specifying format for output, if manual saving is not desired.  Options are `bmp`, `jpeg`, `png`, `tiff`, or `eps`.
-#' @param ... Arguments to be passed to methods such as specifications for \link{plot} or \link{axis}, particularly cex.axis, cex.main, and cex.lab for sizing labels.
+#' @param ... Arguments to be passed to methods such as specifications for \link{plot} or \link{axis}, particularly `cex.axis`, `cex.main`, and `cex.lab` for sizing labels.
 #'
 #' @note
 #' A deprecated version of this code allowed for .csv format to be input.  These can now be converted using \link{conv2indicatordata}.
 #'
-#' Data must be input as a list object of class 'indicatordata' which contains at least three attributes: `labels`, `indicators`, and `datelist`.
+#' Data must be input as a list object of class `indicatordata` which contains at least three attributes: `labels`, `indicators`, and `datelist`.
 #' \itemize{
-#' \item `labels`` is a \link{data.frame} containing up to 3 rows and the number of columns equal to the number of indicators.
+#' \item `labels` is a \link{data.frame} containing up to 3 rows and the number of columns equal to the number of indicators.
 #'        **Row 1** specifies the indicator name, **row 2** specifies the measurement unit, and **row 3** specifies a sublabel.
 #' \item `indicators` is a \link{data.frame} containing the indicator data, with each column containing values for a given indicator and time step.
 #' \item `datelist`` is a \link{vector} containing the time steps at which the indicators were measured, in chronological order.
 #' The length of `datelist`` must be equal to the number of rows in `indicators`.
 #'  \item Time can be in year (with century), or monthly time step in a variety of formats (e.g, Jan1986, Jan-86, 1986jan), including or excluding day of month.
 #'  \item Optional attributes: `ulim` and `llim` are represent, respectively, the upper and lower confidence intervals.
-#'  They must be in the format of a \link{data.frame}, with equal dimensions to `indicators`.  The first column of `ulim`` corresponds to the first column of `indicators`, and so on.
+#'  They must be in the format of a \link{data.frame}, with equal dimensions to `indicators`.  The first column of `ulim` corresponds to the first column of `indicators`, and so on.
 #'  }
 #'
 #' @references
@@ -128,23 +128,23 @@ if (monthly==TRUE) {                                                        # if
     }
 
 # open plot window if png is selected format (default) ----------------------
-if (outtype=="png")  {
-  png(filename = filnam, units = "in", pointsize = 12, res = 72*4,
+if (outtype == "png")  {
+  png(filename = filnam, units = "in", pointsize = 12, res = 72*10,
       width = ((wid+10)/7)*plotcolnum2/1.3, height = hgtadj * (3.5*plotrownum2)/1.3) }
 
-if (outtype=="bmp")  {
-    bmp(filename = filnam, units = "in", pointsize = 12, res = 72*4,
+if (outtype == "bmp")  {
+    bmp(filename = filnam, units = "in", pointsize = 12, res = 72*5,
         width = ((wid+10)/7)*plotcolnum2/1.3, height = hgtadj * (3.5*plotrownum2)/1.3) }
 
-if (outtype=="jpeg")  {
-    jpeg(filename = filnam, units = "in", pointsize = 12, quality = 100,
+if (outtype == "jpeg")  {
+    jpeg(filename = filnam, units = "in", pointsize = 12, quality = 100, res = 72*10,
         width = ((wid+10)/7)*plotcolnum2/1.3, height = hgtadj * (3.5*plotrownum2)/1.3) }
 
-if (outtype=="tiff")  {
-    tiff(filename = filnam, units = "in", pointsize = 12, compression = "none",
+if (outtype == "tiff")  {
+    tiff(filename = filnam, units = "in", pointsize = 12, compression = "none", res = 72*5,
         width = ((wid+10)/7)*plotcolnum2/1.3, height = hgtadj * (3.5*plotrownum2)/1.3) }
 
-if (outtype=="ps")  {
+if (outtype == "ps")  {
   postscript(file = filnam,
              width=((wid+10)/7)*plotcolnum2/1.3, height=hgtadj*(3.5*plotrownum2)/1.3) }  #, pointsize=12, res=72*4)
 
@@ -250,7 +250,7 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
                 c((mean(co_all, na.rm=T)-sd(co_all, na.rm=T)),
                   (mean(co_all, na.rm=T)-sd(co_all, na.rm=T)),
                   (mean(co_all, na.rm=T)+sd(co_all, na.rm=T)),
-                  (mean(co_all, na.rm=T)+sd(co_all, na.rm=T))), col="#0000FF20", border=F)
+                  (mean(co_all, na.rm=T)+sd(co_all, na.rm=T))), col="#0000FF30", border=F)
                   }
 
   # plot the confidence intervals --------------------------

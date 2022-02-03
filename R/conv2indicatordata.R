@@ -19,7 +19,7 @@
 #'  \item **Column 1** is time values, **columns 2** and on are indicator data.  The first three values of column 1 are NA.
 #'  \item Time can be in year (with century), or monthly time step in a variety of formats (e.g, Jan1986, Jan-86, 1986jan), including or excluding day of month.
 #'  }
-#'  @export
+#' @export
 conv2indicatordata <-  function(filename, labrows = 1, datecols = 1, indcols = 2, ulimcols = NA, llimcols = NA, default = F)  {
 
 # read in file --------------------------------------------------------

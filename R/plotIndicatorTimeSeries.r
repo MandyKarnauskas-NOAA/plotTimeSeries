@@ -14,32 +14,32 @@
 #' @param widadj expansion factor to adjust the total width of plot.
 #' @param hgtadj expansion factor to adjust the total height of plot.
 #' @param type a character string indicating which type of plot is desired. Defaults to points, with lines for consecutive time steps only.
-#'         "ptsOnly" and "allLines" can be specified for only points or only lines, respectively.
+#'         `ptsOnly` and `allLines` can be specified for only points or only lines, respectively.
 #' @param CItype is a character string indictating which type of confidence intervals are desired.
-#'          Defaults to shaded bands filling in the area between the upper and lower intervals, or use "pts" for an interval plot.
+#'          Defaults to shaded bands filling in the area between the upper and lower intervals, or use `pts` for an interval plot.
 #' @param trendAnalysis a logical value indicating whether to highlight the trend in mean and slope over last 5 years; defaults to TRUE unless fewer than 5 years of data.
 #' @param tWindow an integer defining the number of years over which the recent trend analysis should be calculated; defaults to last 5 years.
 #' @param propNAallow if fraction denoting the allowable proportion of missing values in last 5 years; when the proportion of NAs exceeds this value, trend analysis will not appear (defaults to 0.5)
 #' @param redgreen a logical value indicating whether to remove red/green shading of anomalies from plot.
-#' @param anom a character string indicating whether to convert indicator to monthly anomalies.  One of "none", "mon" (monthly anomalies) or "stmon" (standardized monthly anomalies) can be used.
+#' @param anom a character string indicating whether to convert indicator to monthly anomalies.  One of `none`, `mon` (monthly anomalies) or `stmon` (standardized monthly anomalies) can be used.
 #' @param dateformat a format as defined in \link{strptime} which is used for monthly time steps only.  Can be full date or month/year combination only.
 #' @param outname a character string specifying alternate output filename; defaults to using the object name.
-#' @param outtype a character string specifying format for output, if manual saving is not desired.  Options are "png" or "pdf".
+#' @param outtype a character string specifying format for output, if manual saving is not desired.  Options are `bmp`, `jpeg`, `png`, `tiff`, or `eps`.
 #' @param ... Arguments to be passed to methods such as specifications for \link{plot} or \link{axis}, particularly cex.axis, cex.main, and cex.lab for sizing labels.
 #'
 #' @note
 #' A deprecated version of this code allowed for .csv format to be input.  These can now be converted using \link{conv2indicatordata}.
 #'
-#' Data must be input as a list object of class 'indicatordata' which contains at least three attributes: **labels**, **indicators**, and **datelist**.
+#' Data must be input as a list object of class 'indicatordata' which contains at least three attributes: `labels`, `indicators`, and `datelist`.
 #' \itemize{
-#' \item **labels** is a \link{data.frame} containing up to 3 rows and the number of columns equal to the number of indicators.
-#'        *Row 1* specifies the indicator name, *row 2* specifies the measurement unit, and *row 3* specifies a sublabel.
-#' \item **indicators** is a \link{data.frame} containing the indicator data, with each column containing values for a given indicator and time step.
-#' \item **datelist** is a \link{vector} containing the time steps at which the indicators were measured, in chronological order.
-#' The length of **datelist** must be equal to the number of rows in **indicators**.
+#' \item `labels`` is a \link{data.frame} containing up to 3 rows and the number of columns equal to the number of indicators.
+#'        **Row 1** specifies the indicator name, **row 2** specifies the measurement unit, and **row 3** specifies a sublabel.
+#' \item `indicators` is a \link{data.frame} containing the indicator data, with each column containing values for a given indicator and time step.
+#' \item `datelist`` is a \link{vector} containing the time steps at which the indicators were measured, in chronological order.
+#' The length of `datelist`` must be equal to the number of rows in `indicators`.
 #'  \item Time can be in year (with century), or monthly time step in a variety of formats (e.g, Jan1986, Jan-86, 1986jan), including or excluding day of month.
-#'  \item Optional attributes: **ulim** and **llim** are represent, respectively, the upper and lower confidence intervals.
-#'  They must be in the format of a \link{data.frame}, with equal dimensions to **indicators**.  The first column of **ulim** corresponds to the first column of **indicators**, and so on.
+#'  \item Optional attributes: `ulim` and `llim` are represent, respectively, the upper and lower confidence intervals.
+#'  They must be in the format of a \link{data.frame}, with equal dimensions to `indicators`.  The first column of `ulim`` corresponds to the first column of `indicators`, and so on.
 #'  }
 #'
 #' @references
@@ -58,6 +58,7 @@
 #'  plotIndicatorTimeSeries(NPP)
 #'  plotIndicatorTimeSeries(NPP, anom = "stmon")
 #'
+#'@export
 plotIndicatorTimeSeries <-  function(indobject, coltoplot = 1, plotrownum = 1, plotcolnum = 1,
                                      sublabel = F, sameYscale = F, yposadj = 1, widadj = 1, hgtadj = 1, type = "default", CItype = "band",
                                      trendAnalysis = T, tWindow = 5, propNAallow = 0.60, redgreen = T, anom = "none",
@@ -114,7 +115,7 @@ if (monthly==TRUE) {                                                        # if
 
 # adjust name for output graphic, if specified ------------------------------
   if (is.na(outname))  {
-        filnam <- paste0(indobject, ".", outtype)
+        filnam <- paste0(indobject$labels[1,1], ".", outtype)
         }
 
 # adjust plot size for extra long labels ------------------------------------
@@ -130,6 +131,22 @@ if (monthly==TRUE) {                                                        # if
 if (outtype=="png")  {
   png(filename = filnam, units = "in", pointsize = 12, res = 72*4,
       width = ((wid+10)/7)*plotcolnum2/1.3, height = hgtadj * (3.5*plotrownum2)/1.3) }
+
+if (outtype=="bmp")  {
+    bmp(filename = filnam, units = "in", pointsize = 12, res = 72*4,
+        width = ((wid+10)/7)*plotcolnum2/1.3, height = hgtadj * (3.5*plotrownum2)/1.3) }
+
+if (outtype=="jpeg")  {
+    jpeg(filename = filnam, units = "in", pointsize = 12, quality = 100,
+        width = ((wid+10)/7)*plotcolnum2/1.3, height = hgtadj * (3.5*plotrownum2)/1.3) }
+
+if (outtype=="tiff")  {
+    tiff(filename = filnam, units = "in", pointsize = 12, compression = "none",
+        width = ((wid+10)/7)*plotcolnum2/1.3, height = hgtadj * (3.5*plotrownum2)/1.3) }
+
+if (outtype=="ps")  {
+  postscript(file = filnam,
+             width=((wid+10)/7)*plotcolnum2/1.3, height=hgtadj*(3.5*plotrownum2)/1.3) }  #, pointsize=12, res=72*4)
 
 # layout for single or multi-panel plots ------------------------------------
   nf <- layout(matrix(c(1:(plotrownum*plotcolnum*2)), plotrownum, plotcolnum*2, byrow = TRUE), rep(c(wid/5, 1), plotcolnum), rep(4, plotrownum))
@@ -410,14 +427,7 @@ if (length(tim) <= 5) {
 
 # end plot ----------------------
 
-# for pdf output ---------------------------------------------------------------
-if (outtype=="pdf")  {
-  dev.copy(pdf, filnam, width=((wid+10)/7)*plotcolnum2/1.3, height=hgtadj*(3.5*plotrownum2)/1.3)  #, pointsize=12, res=72*4)
-  dev.off()
-  }                                                                # close graphics device if pdf
-
-  if (outtype == "png") {  dev.off() }   # close graphics device if png
-
+  if (outtype != "") {  dev.off()  }   # close graphics device if png or eps
 }
 
 

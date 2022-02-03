@@ -47,10 +47,10 @@ plotIndicatorTimeSeries(
 \item{hgtadj}{expansion factor to adjust the total height of plot.}
 
 \item{type}{a character string indicating which type of plot is desired. Defaults to points, with lines for consecutive time steps only.
-"ptsOnly" and "allLines" can be specified for only points or only lines, respectively.}
+\code{ptsOnly} and \code{allLines} can be specified for only points or only lines, respectively.}
 
 \item{CItype}{is a character string indictating which type of confidence intervals are desired.
-Defaults to shaded bands filling in the area between the upper and lower intervals, or use "pts" for an interval plot.}
+Defaults to shaded bands filling in the area between the upper and lower intervals, or use \code{pts} for an interval plot.}
 
 \item{trendAnalysis}{a logical value indicating whether to highlight the trend in mean and slope over last 5 years; defaults to TRUE unless fewer than 5 years of data.}
 
@@ -60,13 +60,13 @@ Defaults to shaded bands filling in the area between the upper and lower interva
 
 \item{redgreen}{a logical value indicating whether to remove red/green shading of anomalies from plot.}
 
-\item{anom}{a character string indicating whether to convert indicator to monthly anomalies.  One of "none", "mon" (monthly anomalies) or "stmon" (standardized monthly anomalies) can be used.}
+\item{anom}{a character string indicating whether to convert indicator to monthly anomalies.  One of \code{none}, \code{mon} (monthly anomalies) or \code{stmon} (standardized monthly anomalies) can be used.}
 
 \item{dateformat}{a format as defined in \link{strptime} which is used for monthly time steps only.  Can be full date or month/year combination only.}
 
 \item{outname}{a character string specifying alternate output filename; defaults to using the object name.}
 
-\item{outtype}{a character string specifying format for output, if manual saving is not desired.  Options are "png" or "pdf".}
+\item{outtype}{a character string specifying format for output, if manual saving is not desired.  Options are \code{bmp}, \code{jpeg}, \code{png}, \code{tiff}, or \code{eps}.}
 
 \item{...}{Arguments to be passed to methods such as specifications for \link{plot} or \link{axis}, particularly cex.axis, cex.main, and cex.lab for sizing labels.}
 }
@@ -78,16 +78,12 @@ An optional trend analysis highlights changes in the mean and slope of the time 
 \note{
 A deprecated version of this code allowed for .csv format to be input.  These can now be converted using \link{conv2indicatordata}.
 
-Data must be input as a list object of class 'indicatordata' which contains at least three attributes: \strong{labels}, \strong{indicators}, and \strong{datelist}.
+Data must be input as a list object of class 'indicatordata' which contains at least three attributes: \code{labels}, \code{indicators}, and \code{datelist}.
 \itemize{
-\item \strong{labels} is a \link{data.frame} containing up to 3 rows and the number of columns equal to the number of indicators.
-\emph{Row 1} specifies the indicator name, \emph{row 2} specifies the measurement unit, and \emph{row 3} specifies a sublabel.
-\item \strong{indicators} is a \link{data.frame} containing the indicator data, with each column containing values for a given indicator and time step.
-\item \strong{datelist} is a \link{vector} containing the time steps at which the indicators were measured, in chronological order.
-The length of \strong{datelist} must be equal to the number of rows in \strong{indicators}.
+\item \verb{labels`` is a \link{data.frame} containing up to 3 rows and the number of columns equal to the number of indicators. **Row 1** specifies the indicator name, **row 2** specifies the measurement unit, and **row 3** specifies a sublabel. \\item }indicators\verb{is a \link{data.frame} containing the indicator data, with each column containing values for a given indicator and time step. \\item}datelist\verb{ is a \link{vector} containing the time steps at which the indicators were measured, in chronological order. The length of `datelist} must be equal to the number of rows in \code{indicators}.
 \item Time can be in year (with century), or monthly time step in a variety of formats (e.g, Jan1986, Jan-86, 1986jan), including or excluding day of month.
-\item Optional attributes: \strong{ulim} and \strong{llim} are represent, respectively, the upper and lower confidence intervals.
-They must be in the format of a \link{data.frame}, with equal dimensions to \strong{indicators}.  The first column of \strong{ulim} corresponds to the first column of \strong{indicators}, and so on.
+\item Optional attributes: \code{ulim} and \code{llim} are represent, respectively, the upper and lower confidence intervals.
+They must be in the format of a \link{data.frame}, with equal dimensions to \code{indicators}.  The first column of \verb{ulim`` corresponds to the first column of }indicators`, and so on.
 }
 }
 \examples{

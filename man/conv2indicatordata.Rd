@@ -37,8 +37,7 @@ The "default" version of the .csv file should be formatted as follows:
 \item \strong{Row 3} contains an optional character string with information on the sublabel (when multiple panels are used).
 \item \strong{Column 1} is time values, \strong{columns 2} and on are indicator data.  The first three values of column 1 are NA.
 \item Time can be in year (with century), or monthly time step in a variety of formats (e.g, Jan1986, Jan-86, 1986jan), including or excluding day of month.
-}
-@export}
+}}
 }
 \description{
 This function is for converting deprecated .csv files into an object of class 'indicatordata'.

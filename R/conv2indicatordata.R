@@ -27,7 +27,7 @@ conv2indicatordata <-  function(filename, labrows = 1, datecols = 1, indcols = 2
 if (default == T)  {
   labrows <- 1:3
   datecols <- 1
-  indcols <- 2: ncol(read.table(filename, header=F, sep=",", skip = 0, quote="", stringsAsFactors = FALSE))
+  indcols <- 2: ncol(read.table(filename, header=F, sep=",", skip = 3, stringsAsFactors = FALSE))
   ulimcols <- NA
   llimcols <- NA
 }
@@ -35,11 +35,11 @@ if (default == T)  {
 if (sum(is.na(ulimcols)) == 1) { ulimcols <- c() }
 if (sum(is.na(llimcols)) == 1) { llimcols <- c() }
 
-indnames <- read.table(filename, header=F, sep=",", skip = 0, quote="", stringsAsFactors = FALSE)[labrows, indcols] # load data file labels
-datdata <- read.table(filename, header=F, sep=",", skip = max(labrows), quote="", stringsAsFactors = FALSE)[, datecols]     # load list of dates
-inddata <- read.table(filename, header=F, sep=",", skip = max(labrows), quote="", stringsAsFactors = FALSE)[, indcols]      # load indicators
-ulidata <- read.table(filename, header=F, sep=",", skip = max(labrows), quote="", stringsAsFactors = FALSE)[, ulimcols]     # load upper confidence intervals
-llidata <- read.table(filename, header=F, sep=",", skip = max(labrows), quote="", stringsAsFactors = FALSE)[, llimcols]     # load lower confidence intervals
+indnames <- read.table(filename, header=F, sep=",", skip = 0, stringsAsFactors = FALSE)[labrows, indcols] # load data file labels
+datdata <- read.table(filename, header=F, sep=",", skip = max(labrows), stringsAsFactors = FALSE)[, datecols]     # load list of dates
+inddata <- read.table(filename, header=F, sep=",", skip = max(labrows), stringsAsFactors = FALSE)[, indcols]      # load indicators
+ulidata <- read.table(filename, header=F, sep=",", skip = max(labrows), stringsAsFactors = FALSE)[, ulimcols]     # load upper confidence intervals
+llidata <- read.table(filename, header=F, sep=",", skip = max(labrows), stringsAsFactors = FALSE)[, llimcols]     # load lower confidence intervals
 
 indnames <- data.frame(indnames)
 inddata <- data.frame(inddata)

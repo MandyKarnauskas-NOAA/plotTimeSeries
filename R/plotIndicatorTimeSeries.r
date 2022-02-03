@@ -221,10 +221,10 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
   par(mgp=c(3*yposadj,1,0))
 
   # blank plot with specified y limits
-  if (sameYscale==T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin_st, ymax_st), ...)    }
-  if (sameYscale==F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin, ymax), ...)                        }
+  if (sameYscale == T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin_st, ymax_st), ...)    }
+  if (sameYscale == F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin, ymax), ...)                        }
 
-  if (length(tim) >= 5 & redgreen==T) {
+  if (redgreen == T) {
 
       # make red and green polygons --------------
       for (j in 2:length(tim))  {  polygon(c(tim[j-1], tim[j], tim[j], tim[j-1]),
@@ -306,7 +306,7 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
 # end data plot -------------------------------------------------------------
 
 # start trend plot ----------------------------------------------------------
-  if (trendAnalysis==T)  {
+  if (trendAnalysis == T)  {
   par(mar=c(2.5,0,3,0))                                                         #  second panel on mean and trend of last 5 years
 
   last5 <-     co_all[which(tim_all > max(tim_all)-tWindow)]
@@ -352,22 +352,6 @@ if (length(tim) <= 5) {
   if (sameYscale==T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin_st, ymax_st), ...)    }
   if (sameYscale==F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin, ymax),...)                          }
 
-  # make red and green polygons --------------------------------------------------
-  if (redgreen==T) {
-    for (j in 2:length(tim))  {
-      polygon(c(tim[j-1], tim[j], tim[j], tim[j-1]),
-           y=c(mean(co, na.rm=T), mean(co, na.rm=T), co[j], co[j-1]),
-           col=colind[as.numeric(mean(co[(j-1):j], na.rm=T) > mean(co, na.rm=T))+1], border=F) }
-    }
-
-# make white square polygon across years ---------------------------------------
-  polygon(c(min(tim_all)-5, max(tim_all)+5,
-            max(tim_all)+5, min(tim_all)-5),
-          c(mean(co_all, na.rm=T)-sd(co_all, na.rm=T),
-            mean(co_all, na.rm=T)-sd(co_all, na.rm=T),
-            mean(co_all, na.rm=T)+sd(co_all, na.rm=T),
-            mean(co_all, na.rm=T)+sd(co_all, na.rm=T)), col="white", border=T)
-
   # plot the confidence intervals --------------------------
 
   if (length(indobject$llim) > 0) {
@@ -410,8 +394,8 @@ if (length(tim) <= 5) {
 
 # add mean and SE parallel lines -----------------------------------------------
   abline(h=mean(co, na.rm=T), lty=8)
-  abline(h=mean(co, na.rm=T)+sd(co, na.rm=T), lty=1)
-  abline(h=mean(co, na.rm=T)-sd(co, na.rm=T), lty=1)
+#  abline(h=mean(co, na.rm=T)+sd(co, na.rm=T), lty=1)
+#  abline(h=mean(co, na.rm=T)-sd(co, na.rm=T), lty=1)
 
   axis(1, at=tim, ...)
   axis(1, at=seq(1900, 2050, 1), tck=-0.015, lab=rep("", 151), ...)                                                 # add axes

@@ -67,7 +67,6 @@ Data must be input in a data frame where rows represent time steps and columns r
 
  trafficLightPlot(GOMlandings, mintime = 1980, maxtime = 2000, splits = 4, method = "nmds")
 
-
 }
 \references{
 \url{https://www.aoml.noaa.gov/ocd/ocdweb/ESR_GOMIEA/report/GoM_EcosystemStatusReport2017.pdf}

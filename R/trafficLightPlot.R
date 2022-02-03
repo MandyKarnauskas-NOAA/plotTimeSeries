@@ -38,7 +38,7 @@
 #'
 #'  trafficLightPlot(GOMlandings, mintime = 1980, maxtime = 2000, splits = 4, method = "nmds")
 #'
-#'
+#' @export
 trafficLightPlot <- function(dataset, columns = NA, mintime = NA, maxtime = NA,
                     noNAs = 0, splits = 5, cexlabs = 0.9, indatformat = "%Y", outdatformat = "%Y",
                     graycol = FALSE, method = "pca", PC = 1)   {

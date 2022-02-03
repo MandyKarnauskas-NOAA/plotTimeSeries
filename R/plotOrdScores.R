@@ -36,6 +36,7 @@
 #'
 #'  plotOrdScores(GOMlandings)
 #'
+#' @export
 plotOrdScores <- function(dataset, columns = NA, mintime = NA, maxtime = NA, noNAs = 0,
                           color = "rainbow", lab.cols = 1, tim.cex = 1, add.pts = FALSE,
                           indatformat = "%Y", outdatformat = "%y", main = "title",

@@ -35,7 +35,7 @@
 #' \item `labels` is a \link{data.frame} containing up to 3 rows and the number of columns equal to the number of indicators.
 #'        **Row 1** specifies the indicator name, **row 2** specifies the measurement unit, and **row 3** specifies a sublabel.
 #' \item `indicators` is a \link{data.frame} containing the indicator data, with each column containing values for a given indicator and time step.
-#' \item `datelist`` is a \link{vector} containing the time steps at which the indicators were measured, in chronological order.
+#' \item `datelist` is a \link{vector} containing the time steps at which the indicators were measured, in chronological order.
 #' The length of `datelist`` must be equal to the number of rows in `indicators`.
 #'  \item Time can be in year (with century), or monthly time step in a variety of formats (e.g, Jan1986, Jan-86, 1986jan), including or excluding day of month.
 #'  \item Optional attributes: `ulim` and `llim` are represent, respectively, the upper and lower confidence intervals.
@@ -201,10 +201,9 @@ yl <- d1[2,i]
 
 expflag <- 0
 
-if (grepl("m2", yl) == TRUE)  {
+if (grepl("^", yl) == TRUE)  {
   yl1 <- str_replace_all(yl, " ", "~")
-  yl2 <- str_replace_all(yl1, "2", "^2")
-  yl <- yl2
+  yl <- yl1
   expflag <- 1
   }
 

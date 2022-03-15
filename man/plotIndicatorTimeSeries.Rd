@@ -84,7 +84,10 @@ Data must be input as a list object of class \code{indicatordata} which contains
 \strong{Row 1} specifies the indicator name, \strong{row 2} specifies the measurement unit, and \strong{row 3} specifies a sublabel.
 \item \code{indicators} is a \link{data.frame} containing the indicator data, with each column containing values for a given indicator and time step.
 \item \code{datelist} is a \link{vector} containing the time steps at which the indicators were measured, in chronological order.
-The length of \verb{datelist`` must be equal to the number of rows in }indicators\verb{. \\item Time can be in year (with century), or monthly time step in a variety of formats (e.g, Jan1986, Jan-86, 1986jan), including or excluding day of month. \\item Optional attributes: }ulim\code{and}llim\verb{are represent, respectively, the upper and lower confidence intervals. They must be in the format of a \link{data.frame}, with equal dimensions to}indicators\verb{.  The first column of }ulim\verb{corresponds to the first column of}indicators`, and so on.
+The length of \code{datelist} must be equal to the number of rows in \code{indicators}.
+\item Time can be in year (with century), or monthly time step in a variety of formats (e.g, Jan1986, Jan-86, 1986jan), including or excluding day of month.
+\item Optional attributes: \code{ulim} and \code{llim} are represent, respectively, the upper and lower confidence intervals.
+They must be in the format of a \link{data.frame}, with equal dimensions to \code{indicators}.  The first column of \code{ulim} corresponds to the first column of \code{indicators}, and so on.
 }
 }
 \examples{

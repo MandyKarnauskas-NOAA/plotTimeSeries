@@ -36,7 +36,7 @@
 #'        **Row 1** specifies the indicator name, **row 2** specifies the measurement unit, and **row 3** specifies a sublabel.
 #' \item `indicators` is a \link{data.frame} containing the indicator data, with each column containing values for a given indicator and time step.
 #' \item `datelist` is a \link{vector} containing the time steps at which the indicators were measured, in chronological order.
-#' The length of `datelist`` must be equal to the number of rows in `indicators`.
+#' The length of `datelist` must be equal to the number of rows in `indicators`.
 #'  \item Time can be in year (with century), or monthly time step in a variety of formats (e.g, Jan1986, Jan-86, 1986jan), including or excluding day of month.
 #'  \item Optional attributes: `ulim` and `llim` are represent, respectively, the upper and lower confidence intervals.
 #'  They must be in the format of a \link{data.frame}, with equal dimensions to `indicators`.  The first column of `ulim` corresponds to the first column of `indicators`, and so on.
@@ -68,7 +68,9 @@ plotIndicatorTimeSeries <-  function(indobject, coltoplot = 1, plotrownum = 1, p
 
   if ("fields" %in% installed.packages() == FALSE) { install.packages("fields") }
   library(fields)
-
+  if ("stringr" %in% installed.packages() == FALSE) { install.packages("stringr") }
+  library(stringr)
+  
 # read in file --------------------------------------------------------
 
 if (class(indobject) != "indicatordata")  {  print("Need to use indicatordata object")  }
@@ -171,41 +173,58 @@ if (outtype == "ps")  {
   for (i in coltoplot)  {
 
   co_all <- d[,i]                                                 # data
+  if (length(indobject$llim) > 0) {
+    ulim_all <- indobject$ulim[, i]
+    llim_all <- indobject$llim[, i]
+  }
 
 # calculate monthly anomalies if specified ------------------------------
     if (anom=="mon")  {
+      yl2 <- "monthly anomaly"
       moref <- match(strftime(datelis, format="%b"), month.abb)
       moav  <- tapply(co_all, moref, mean, na.rm=T)
         for (m in 1:12) {
-          co_all[which(moref==m)] <- co_all[which(moref==m)] - moav[m]    }
+          co_all[which(moref == m)]   <- co_all[which(moref == m)] - moav[m]   
+          if (length(indobject$llim) > 0) {
+          ulim_all[which(moref == m)] <- ulim_all[which(moref == m)] - moav[m]   
+          llim_all[which(moref == m)] <- llim_all[which(moref == m)] - moav[m] }
+          }
                       }
 
 # calculate standardized monthly anomalies if specified ------------------
     if (anom=="stmon")  {
+      yl2 <- "standardized monthly anomaly"
       moref <- match(strftime(datelis, format="%b"), month.abb)
       moav  <- tapply(co_all, moref, mean, na.rm=T)
       most  <- tapply(co_all, moref, sd, na.rm=T)
         for (m in 1:12) {
-          co_all[which(moref==m)] <- (co_all[which(moref==m)] - moav[m])/most[m]   }
+          co_all[which(moref == m)]   <- (co_all[which(moref == m)] - moav[m])/most[m]  
+          if (length(indobject$llim) > 0) {
+          ulim_all[which(moref == m)] <- (ulim_all[which(moref == m)] - moav[m])/most[m]  
+          llim_all[which(moref == m)] <- (llim_all[which(moref == m)] - moav[m])/most[m]  }
+          }
     }
-
+  if (length(indobject$llim) > 0) {
+    ulim <-  ulim_all[!is.na(co_all)]
+    llim <-  llim_all[!is.na(co_all)] 
+  }
+  
 # create sublabel ---------------------------------------------------------
   if (sublabel==T) { mm <- paste(as.character(d1[1,i]), "\n", as.character(d1[3,i]), sep="") } else {
-                     mm <- d1[1,i] }                               # create y-axis label
-
-yl <- d1[2,i]
-  if (anom=="mon")   { yl <- paste(yl, "\n", "monthly anomaly", sep="") }     # adjust label if monthly anomaly
-  if (anom=="stmon") { yl <- paste(yl, "\n", "standardized monthly anomaly", sep="") }
+                     mm <- d1[1,i] }                               # create main label
 
 # insert subscript for m2 units --------------------------------------------
 
+yl <- d1[2,i]
 expflag <- 0
 
 if (grepl("^", yl) == TRUE)  {
   yl1 <- str_replace_all(yl, " ", "~")
   yl <- yl1
   expflag <- 1
-  }
+}
+
+ylabcex <- 1
 
 colind <- c("#FF000080", "#00FF0080")             # shading of anomalies +/- 1 S.D.
 
@@ -228,17 +247,24 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
 
   if (trendAnalysis==T)  {  par(mar=c(2.5,5,3,0), xpd=F)  }  else  {    # set margins based on trend analysis T or F
                             par(mar=c(2.5,5,3,1), xpd=F)  }
-  par(mgp=c(3*yposadj,1,0))
 
   # blank plot with specified y limits
-  if (expflag == 1) {
+  
+  base <- 3 * yposadj
+  if (anom != "none")  {  base <- base + 0.4  } 
+  
+  par(mgp=c(base, 1, 0))
+  
+  if (expflag == 1) { 
     if (sameYscale == T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = parse(text = yl), main = mm, ylim = c(ymin_st, ymax_st), ...)    }
-    if (sameYscale == F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = parse(text = yl), main = mm, ylim = c(ymin, ymax), ...)                        }
-  }  else {
-    if (sameYscale == T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin_st, ymax_st), ...)    }
-    if (sameYscale == F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin, ymax), ...)                        }
+    if (sameYscale == F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = parse(text = yl), main = mm, ylim = c(ymin, ymax), ...)          }
   }
-
+  if (expflag == 0) { 
+    if (sameYscale == T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin_st, ymax_st), ...)    }
+    if (sameYscale == F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin, ymax), ...)          }
+  }
+  if (anom != "none")  {  title("", ylab = yl2, line = base - 0.8)  }
+  
   if (redgreen == T) {
 
       # make red and green polygons --------------
@@ -271,18 +297,13 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
   # plot the confidence intervals --------------------------
 
   if (length(indobject$llim) > 0) {
-  ulim_all <- indobject$ulim[, i]
-  llim_all <- indobject$llim[, i]
-  ulim <-  ulim_all[!is.na(co_all)]
-  llim <-  llim_all[!is.na(co_all)]
-
-  if (CItype == "pts")  {
-    for (m in 1:length(tim_all))  {
-      arrows(tim_all[m], ulim_all[m], x1 = tim_all[m], y1 = llim_all[m], length = 1/wid, angle = 90, code = 3, col = gray(0.4))
+    if (CItype == "pts")  {
+      for (m in 1:length(tim_all))  {
+        arrows(tim_all[m], ulim_all[m], x1 = tim_all[m], y1 = llim_all[m], length = 1/wid, angle = 90, code = 3, col = gray(0.4))
     }
   }            # plot time series - points
-  if (CItype == "band")  {
-    polygon(x = c(tim, tim[length(tim): 1]), y = c(ulim, llim[length(tim): 1]), border = NA, col = "#00000020")   }
+    if (CItype == "band")  {
+      polygon(x = c(tim, tim[length(tim): 1]), y = c(ulim, llim[length(tim): 1]), border = NA, col = "#00000020")   }
   }
 
   # plot the points or the lines -----------------------------------------
@@ -360,18 +381,24 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
 if (length(tim) <= 5) {
 
   par(mar=c(2.5,5,3,1), xpd=F)
-
-  par(mgp=c(3*yposadj,1,0))
-
+  
   # plot time series - blank plot to fill in -------------------------------------
-  if (expflag == 1) {
+  
+  base <- 3 * yposadj
+  if (anom != "none")  {  base <- base + 0.4  } 
+  
+  par(mgp=c(base, 1, 0))
+  
+  if (expflag == 1) { 
     if (sameYscale == T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = parse(text = yl), main = mm, ylim = c(ymin_st, ymax_st), ...)    }
-    if (sameYscale == F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = parse(text = yl), main = mm, ylim = c(ymin, ymax), ...)                        }
-  }  else {
-    if (sameYscale == T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin_st, ymax_st), ...)    }
-    if (sameYscale == F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin, ymax), ...)                        }
+    if (sameYscale == F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = parse(text = yl), main = mm, ylim = c(ymin, ymax), ...)          }
   }
-
+  if (expflag == 0) { 
+    if (sameYscale == T)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin_st, ymax_st), ...)    }
+    if (sameYscale == F)  {   plot(tim_all, co_all, col = 0, axes = F, xlab = "", ylab = yl, main = mm, ylim = c(ymin, ymax), ...)          }
+  }
+  if (anom != "none")  {  title("", ylab = yl2, line = base - 0.8)  }
+  
   # plot the confidence intervals --------------------------
 
   if (length(indobject$llim) > 0) {

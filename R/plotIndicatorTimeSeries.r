@@ -231,7 +231,7 @@ if (shadeCol == "redgreen")  {                  # shading of anomalies +/- 1 S.D
   colind <- c("#FF000080", "#00FF0080")
   colWindow = "#0000FF30"    }  else  { 
   colind <- c("#FF000080", "#0000FF80")  
-  colWindow = "#00000030"  
+  colWindow = "#FFFF0050"  
   }            
 
 # in case of missing values in column -------------------------------------

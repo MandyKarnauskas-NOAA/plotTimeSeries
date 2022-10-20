@@ -19,7 +19,8 @@ plotIndicatorTimeSeries(
   trendAnalysis = T,
   tWindow = 5,
   propNAallow = 0.6,
-  redgreen = T,
+  shading = T,
+  shadeCol = "redgreen",
   anom = "none",
   dateformat = "\%b\%Y",
   outname = NA,
@@ -58,7 +59,9 @@ Defaults to shaded bands filling in the area between the upper and lower interva
 
 \item{propNAallow}{if fraction denoting the allowable proportion of missing values in last 5 years; when the proportion of NAs exceeds this value, trend analysis will not appear (defaults to 0.5)}
 
-\item{redgreen}{a logical value indicating whether to remove red/green shading of anomalies from plot.}
+\item{shading}{a logical value indicating whether to remove red/green shading of anomalies from plot.}
+
+\item{shadeCol}{a character string indicating whether to use standard red/green shading. Alternate option is \code{redblue}.}
 
 \item{anom}{a character string indicating whether to convert indicator to monthly anomalies.  One of \code{none}, \code{mon} (monthly anomalies) or \code{stmon} (standardized monthly anomalies) can be used.}
 

@@ -20,7 +20,8 @@
 #' @param trendAnalysis a logical value indicating whether to highlight the trend in mean and slope over last 5 years; defaults to TRUE unless fewer than 5 years of data.
 #' @param tWindow an integer defining the number of years over which the recent trend analysis should be calculated; defaults to last 5 years.
 #' @param propNAallow if fraction denoting the allowable proportion of missing values in last 5 years; when the proportion of NAs exceeds this value, trend analysis will not appear (defaults to 0.5)
-#' @param redgreen a logical value indicating whether to remove red/green shading of anomalies from plot.
+#' @param shading a logical value indicating whether to remove red/green shading of anomalies from plot.
+#' @param shadeCol a character string indicating whether to use standard red/green shading. Alternate option is `redblue`.  
 #' @param anom a character string indicating whether to convert indicator to monthly anomalies.  One of `none`, `mon` (monthly anomalies) or `stmon` (standardized monthly anomalies) can be used.
 #' @param dateformat a format as defined in \link{strptime} which is used for monthly time steps only.  Can be full date or month/year combination only.
 #' @param outname a character string specifying alternate output filename; defaults to using the object name.
@@ -61,7 +62,7 @@
 #'@export
 plotIndicatorTimeSeries <-  function(indobject, coltoplot = 1, plotrownum = 1, plotcolnum = 1,
                                      sublabel = F, sameYscale = F, yposadj = 1, widadj = 1, hgtadj = 1, type = "default", CItype = "band",
-                                     trendAnalysis = T, tWindow = 5, propNAallow = 0.60, redgreen = T, anom = "none",
+                                     trendAnalysis = T, tWindow = 5, propNAallow = 0.60, shading = T, shadeCol = "redgreen", anom = "none",
                                      dateformat = "%b%Y", outname = NA, outtype = "", ...)  {
 
 # dependencies ------------------------------------------
@@ -226,7 +227,9 @@ if (grepl("^", yl) == TRUE)  {
 
 ylabcex <- 1
 
-colind <- c("#FF000080", "#00FF0080")             # shading of anomalies +/- 1 S.D.
+if (shadeCol == "redgreen")  {                  # shading of anomalies +/- 1 S.D.
+  colind <- c("#FF000080", "#00FF0080")   }  else  { 
+  colind <- c("#FF000080", "#0000FF80")   }            
 
 # in case of missing values in column -------------------------------------
   if (sum(!is.na(co_all)) == 0) {  plot.new(); plot.new()  }  else  {
@@ -265,7 +268,7 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
   }
   if (anom != "none")  {  title("", ylab = yl2, line = base - 0.8)  }
   
-  if (redgreen == T) {
+  if (shading == T) {
 
       # make red and green polygons --------------
       for (j in 2:length(tim))  {  polygon(c(tim[j-1], tim[j], tim[j], tim[j-1]),

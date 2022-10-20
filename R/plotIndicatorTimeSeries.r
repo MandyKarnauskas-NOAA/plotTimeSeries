@@ -228,8 +228,11 @@ if (grepl("^", yl) == TRUE)  {
 ylabcex <- 1
 
 if (shadeCol == "redgreen")  {                  # shading of anomalies +/- 1 S.D.
-  colind <- c("#FF000080", "#00FF0080")   }  else  { 
-  colind <- c("#FF000080", "#0000FF80")   }            
+  colind <- c("#FF000080", "#00FF0080")
+  colWindow = "#0000FF30"    }  else  { 
+  colind <- c("#FF000080", "#0000FF80")  
+  colWindow = "#00000030"  
+  }            
 
 # in case of missing values in column -------------------------------------
   if (sum(!is.na(co_all)) == 0) {  plot.new(); plot.new()  }  else  {
@@ -294,7 +297,7 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
                 c((mean(co_all, na.rm=T)-sd(co_all, na.rm=T)),
                   (mean(co_all, na.rm=T)-sd(co_all, na.rm=T)),
                   (mean(co_all, na.rm=T)+sd(co_all, na.rm=T)),
-                  (mean(co_all, na.rm=T)+sd(co_all, na.rm=T))), col="#0000FF30", border=F)
+                  (mean(co_all, na.rm=T)+sd(co_all, na.rm=T))), col = colWindow, border=F)
                   }
 
   # plot the confidence intervals --------------------------

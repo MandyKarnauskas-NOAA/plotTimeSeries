@@ -119,7 +119,7 @@ if (monthly==TRUE) {                                                        # if
 # adjust name for output graphic, if specified ------------------------------
   if (is.na(outname))  {
         filnam <- paste0(indobject$labels[1,1], ".", outtype)
-        }
+        }  else {  filnam <- outname    }
 
 # adjust plot size for extra long labels ------------------------------------
   if (sublabel==T) { mm <- paste(as.character(d1[1,max(coltoplot)]), "\n", as.character(d1[3,max(coltoplot)]), sep="")

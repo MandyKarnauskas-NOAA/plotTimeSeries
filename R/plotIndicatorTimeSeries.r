@@ -98,22 +98,25 @@ if (class(dd[1]) == "integer" & nchar(dd[1]) <= 4) {              # is time colu
       }
   }
 
+ptsizadj <- 1
 if (monthly==TRUE) {                                                        # if monthly, convert to decimal date
   tim_all <- as.numeric(substr(datelis, 1, 4)) + ((as.numeric(strftime(datelis, format = "%j")) - 1) / 365)
+  ptsizadj <- 3
 }
 
 # adjustment for width ---------------------------------------------------
-  if (monthly == F) { wid <- length(tim_all) * 1.5 }  else  { wid <- length(tim_all) / 6 }
-  if (length(tim_all) <= 10 & length(tim_all) > 5) {  wid <- wid*2  }
-  if (length(tim_all) <= 5)  {  wid <- wid*3  }
+  wid <- length(tim_all) / 12 + 10
+  if (monthly == F) { wid <- wid * 1.5 }  
+  if (length(tim_all) <= 10 & length(tim_all) > 5) {  wid <- wid * 2  }
+  # if (length(tim_all) <= 5)  {  wid <- wid * 3  }
   wid <- wid * widadj     #  set adjusted width if specified
-
+  
 # set graphics specifications based on number of panels ------------------
 
   if (length(coltoplot) > (plotrownum * plotcolnum)) {  plotcolnum <- 2; plotrownum <- ceiling(length(coltoplot) / 2)  }
   #  if (length(coltoplot) < (plotrownum * plotcolnum)) {  plotrownum <- length(coltoplot)  }
 
-  if (plotcolnum + plotrownum > 2)  { plotcolnum2 <- plotcolnum*0.65; plotrownum2 <- plotrownum*0.65 }  else
+  if (plotcolnum + plotrownum > 3)  { plotcolnum2 <- plotcolnum*0.65; plotrownum2 <- plotrownum*0.65 }  else
                                     { plotcolnum2 <- plotcolnum; plotrownum2 <- plotrownum }
 
 # adjust name for output graphic, if specified ------------------------------
@@ -133,7 +136,7 @@ if (monthly==TRUE) {                                                        # if
 # open plot window if png is selected format (default) ----------------------
 if (outtype == "png")  {
   png(filename = filnam, units = "in", pointsize = 12, res = 72*10,
-      width = ((wid+10)/7)*plotcolnum2/1.3, height = hgtadj * (3.5*plotrownum2)/1.3) }
+      width = ((wid+10)/5) * plotcolnum2/1.3, height = hgtadj * (3.5*plotrownum2)/1.5) }
 
 if (outtype == "bmp")  {
     bmp(filename = filnam, units = "in", pointsize = 12, res = 72*5,
@@ -315,14 +318,14 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
   # plot the points or the lines -----------------------------------------
   tstep <- round(mean(diff(tim_all)), 2)   # determine time step
     if (type == "ptsOnly")  {
-        points(tim_all, co_all, pch=20, cex=1.5)
+        points(tim_all, co_all, pch=20, cex=1.5/ptsizadj)
         }            # plot time series - points
     if (type == "default")  {
       if (round(mean(diff(tim)), 2) >= tstep)  {
-        points(tim_all, co_all, pch=20, cex=0.75)   # if gaps between time steps, plot small points because lines may not appear
+        points(tim_all, co_all, pch=20, cex=0.75/ptsizadj)   # if gaps between time steps, plot small points because lines may not appear
         }
       if (round(mean(diff(tim)), 2) == tstep)  {
-        points(tim_all, co_all, pch=20, cex=1.5)    # if no gaps between time steps, plot larger pts because lines will connect all
+        points(tim_all, co_all, pch=20, cex=1.5/ptsizadj)    # if no gaps between time steps, plot larger pts because lines will connect all
         }
         inc <- tim[which(round(diff(tim), 2) <= tstep)]  # which time steps are equal?
       for (n in inc)  {
@@ -332,7 +335,7 @@ if (length(tim) > 5) {                  # plotting if more than 5 data points
         }
       if (type == "allLines")  {
         lines(tim, co, lwd=2)               # plot time series - lines for all years
-        points(tim_all, co_all, pch=20, cex=0.75)
+        points(tim_all, co_all, pch=20, cex=0.75/ptsizadj)
       }
 
     # add parallel lines for mean and sd ---------------------------
@@ -425,14 +428,14 @@ if (length(tim) <= 5) {
   # plot the points or the lines -----------------------------------------
   tstep <- round(mean(diff(tim_all)), 2)   # determine time step
   if (type == "ptsOnly")  {
-    points(tim_all, co_all, pch=20, cex=1.5)
+    points(tim_all, co_all, pch=20, cex=1.5/ptsizadj)
   }            # plot time series - points
   if (type == "default")  {
     if (round(mean(diff(tim)), 2) > tstep)  {
-      points(tim_all, co_all, pch=20, cex=0.75)   # if gaps between time steps, plot small points because lines may not appear
+      points(tim_all, co_all, pch=20, cex=0.75/ptsizadj)   # if gaps between time steps, plot small points because lines may not appear
     }
     if (round(mean(diff(tim)), 2) == tstep)  {
-      points(tim_all, co_all, pch=20, cex=1.5)    # if no gaps between time steps, plot larger pts because lines will connect all
+      points(tim_all, co_all, pch=20, cex=1.5/ptsizadj)    # if no gaps between time steps, plot larger pts because lines will connect all
     }
     inc <- tim[which(round(diff(tim), 2) <= tstep)]  # which time steps are equal?
     for (n in inc)  {
@@ -442,7 +445,7 @@ if (length(tim) <= 5) {
     }
   if (type == "allLines")  {
     lines(tim, co, lwd=2)               # plot time series - lines for all years
-    points(tim_all, co_all, pch=20, cex=0.75)
+    points(tim_all, co_all, pch=20, cex=0.75/ptsizadj)
   }
 
 # add mean and SE parallel lines -----------------------------------------------

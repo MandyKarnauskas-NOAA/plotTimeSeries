@@ -82,7 +82,7 @@ trafficLightPlot <- function(dataset, columns = NA, mintime = NA, maxtime = NA,
 # split by quintiles or quantiles ----------------
     if (splits == 5)  {
       levs <- quantile(m2, na.rm = T, probs = seq(0, 1, 0.2))
-      cols = c("#FF000039", "#FF900049", "#CCFF0069" , "#0090FF89", "#0000FF99")
+      cols = c("#FF000099", "#FF900089", "#CCFF0079" , "#0090FF89", "#0000FF99")
         if (graycol==TRUE)  { cols = gray(seq(0.2, 1, 0.2))  }
     }
     if (splits == 4)  {
